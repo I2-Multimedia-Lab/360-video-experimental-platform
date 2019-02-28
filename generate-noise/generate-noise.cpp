@@ -150,14 +150,18 @@ int main(int argc, char* argv[])
     _fseeki64(fpi, 0L, SEEK_SET);
 
     uint8_t* buffer = new uint8_t[frameSize];
+    bool error = false;
     for (int i = 0; i < numFrames; i++) {
         fread(buffer, frameSize, 1, fpi);
 
         cv::Mat yuvImg;
         yuvImg.create(param._height * 3 / 2, param._width, CV_8UC1);
         memcpy(yuvImg.data, buffer, frameSize);
-        if (yuvImg.empty())
+        if (yuvImg.empty()) {
+            error = true;
             break;
+        }
+            
         cv::Mat rgbImg;
         cvtColor(yuvImg, rgbImg, CV_YUV2BGR_I420);
 
@@ -173,13 +177,19 @@ int main(int argc, char* argv[])
 
         printf("\rProcessing... %.1lf%%",(i / (double)numFrames) * 100);
     }
-    printf("\rProcessing... 100%%\n");
+    if (error) {
+        printf("Oops, something wrong.\n");
+    }
+    else {
+        printf("\rProcessing... 100%%\n");
+        printf("Completed.\n");
+    }
+    
     delete[] buffer;
 
     fclose(fpi);
     fclose(fpo);
 
-    printf("Completed.\n");
     return 0;
 }
 
