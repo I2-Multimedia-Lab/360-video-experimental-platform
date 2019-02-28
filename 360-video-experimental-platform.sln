@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "generate-noise", "generate-noise\generate-noise.vcxproj", "{105831A4-3333-4C00-AFB0-13862A772398}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntss-block-matching", "ntss-block-matching\ntss-block-matching.vcxproj", "{062549C1-3EE4-4AD0-887F-A8C870CF7EC0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -15,6 +17,10 @@ Global
 		{105831A4-3333-4C00-AFB0-13862A772398}.Debug|x86.Build.0 = Debug|Win32
 		{105831A4-3333-4C00-AFB0-13862A772398}.Release|x86.ActiveCfg = Release|Win32
 		{105831A4-3333-4C00-AFB0-13862A772398}.Release|x86.Build.0 = Release|Win32
+		{062549C1-3EE4-4AD0-887F-A8C870CF7EC0}.Debug|x86.ActiveCfg = Debug|Win32
+		{062549C1-3EE4-4AD0-887F-A8C870CF7EC0}.Debug|x86.Build.0 = Debug|Win32
+		{062549C1-3EE4-4AD0-887F-A8C870CF7EC0}.Release|x86.ActiveCfg = Release|Win32
+		{062549C1-3EE4-4AD0-887F-A8C870CF7EC0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
