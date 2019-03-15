@@ -26,7 +26,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VWS-PSNR.cpp">
+    <ClCompile Include="vws-psnr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

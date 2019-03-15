@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9A019341-205F-4ABB-8019-F2C20FA71518}</ProjectGuid>
+    <ProjectGuid>{85C92AAD-6F72-4263-8F2F-16E7B02B088C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>VWSPSNR</RootNamespace>
+    <RootNamespace>vwspsnr</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -152,7 +152,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="VWS-PSNR.cpp" />
+    <ClCompile Include="vws-psnr.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
