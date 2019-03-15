@@ -11,5 +11,7 @@
 #include <tchar.h>
 
 #include <string>
+#include <cmath>
+#include <fstream>
 
 #include <opencv2\opencv.hpp>
