@@ -90,35 +90,13 @@ double MSE(cv::InputArray s1, cv::InputArray s2)
     return mse;
 }
 
-cv::Mat1d Match(const cv::Mat& c, const cv::Mat& r, int x, int y, int step)
+cv::Mat1d Match(const cv::Mat& c, const cv::Mat& r, const cv::Point& center, const cv::Point& target, int step = 1, bool skipNOC = false)
 {
     cv::Mat1d diff = cv::Mat1d::ones(3, 3);
     diff *= DBL_MAX;
 
-    cv::Mat cb(c, cv::Rect(x, y, BLOCK_SIZE, BLOCK_SIZE));
-
-    int w = c.cols;
-    int h = c.rows;
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            int rx = x - step + j * step;
-            int ry = y - step + i * step;
-
-            if (rx < 0 || ry < 0 || rx >= w - BLOCK_SIZE || ry >= h - BLOCK_SIZE)  // out of bounds
-                continue;
-
-            cv::Mat rb(r, cv::Rect(rx, ry, BLOCK_SIZE, BLOCK_SIZE));
-            diff[i][j] = MAD(cb, rb);
-        }
-    }
-
-    return diff;
-}
-
-cv::Mat1d Match(const cv::Mat& c, const cv::Mat& r, int x, int y, const cv::Point& pt, int step = 1)
-{
-    cv::Mat1d diff = cv::Mat1d::ones(3, 3);
-    diff *= DBL_MAX;
+    int x = center.x;
+    int y = center.y;
 
     cv::Mat cb(c, cv::Rect(x, y, BLOCK_SIZE, BLOCK_SIZE));
 
@@ -127,13 +105,13 @@ cv::Mat1d Match(const cv::Mat& c, const cv::Mat& r, int x, int y, const cv::Poin
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            int rx = pt.x - step + j * step;
-            int ry = pt.y - step + i * step;
+            int rx = target.x - step + j * step;
+            int ry = target.y - step + i * step;
 
             if (rx < 0 || ry < 0 || rx >= w - BLOCK_SIZE || ry >= h - BLOCK_SIZE)  // out of bounds
                 continue;
 
-            if (rx >= x - 1 && rx <= x + 1 && ry >= y - 1 && ry <= y + 1) // avoid recalculating
+            if (skipNOC && rx >= x - 1 && rx <= x + 1 && ry >= y - 1 && ry <= y + 1) // avoid recalculating neighbors of center
                 continue;
 
             cv::Mat rb(r, cv::Rect(rx, ry, BLOCK_SIZE, BLOCK_SIZE));
@@ -166,7 +144,7 @@ bool EstimateMotionVector(const cv::Mat& c, const cv::Mat& r, cv::Mat& mv)
             int step = stepMax;
 
             // check 8 locations at distance = stepMax, generally 4
-            cv::Mat1d diff1 = Match(c, r, x, y, step);
+            cv::Mat1d diff1 = Match(c, r, cv::Point(x, y), cv::Point(x, y), step);
             //std::cout << diff1 << std::endl;
 
             double min1;
@@ -174,7 +152,7 @@ bool EstimateMotionVector(const cv::Mat& c, const cv::Mat& r, cv::Mat& mv)
             cv::minMaxLoc(diff1, &min1, NULL, &min1Loc, NULL);
 
             // check 8 locations at distance = 1
-            cv::Mat1d diff2 = Match(c, r, x, y, 1);
+            cv::Mat1d diff2 = Match(c, r, cv::Point(x, y), cv::Point(x, y), 1);
             //std::cout << diff2 << std::endl;
 
             double min2;
@@ -206,7 +184,7 @@ bool EstimateMotionVector(const cv::Mat& c, const cv::Mat& r, cv::Mat& mv)
 
             // second-step-stop
             if (ntssFlag) { 
-                diff2 = Match(c, r, x, y, minLoc);
+                diff2 = Match(c, r, cv::Point(x, y), minLoc, 1, true);
                 //std::cout << diff2 << std::endl;
 
                 cv::minMaxLoc(diff2, &min2, NULL, &min2Loc, NULL);
@@ -223,7 +201,7 @@ bool EstimateMotionVector(const cv::Mat& c, const cv::Mat& r, cv::Mat& mv)
             // do normal TSS 
             step /= 2;
 
-            diff1 = Match(c, r, x, y, minLoc, step);
+            diff1 = Match(c, r, cv::Point(x, y), minLoc, step, true);
             //std::cout << diff1 << std::endl;
 
             cv::minMaxLoc(diff1, &min1, NULL, &min1Loc, NULL);
@@ -239,7 +217,7 @@ bool EstimateMotionVector(const cv::Mat& c, const cv::Mat& r, cv::Mat& mv)
 
             // last step search
             step /= 2;
-            diff1 = Match(c, r, x, y, minLoc, step);
+            diff1 = Match(c, r, cv::Point(x, y), minLoc, step, true);
             //std::cout << diff1 << std::endl;
 
             cv::minMaxLoc(diff1, &min1, NULL, &min1Loc, NULL);
@@ -283,7 +261,6 @@ int main(int argc, char* argv[])
     uint8_t* buffer = new uint8_t[yuvSize];
     bool error = false;
 
-    //cv::namedWindow("NTSS", cv::WINDOW_NORMAL);
     do 
     {
         fread(buffer, yuvSize, 1, fp);
@@ -311,10 +288,6 @@ int main(int argc, char* argv[])
             cv::Mat& mv = motionVectors[i];
             bool r = EstimateMotionVector(curFrame, preFrame, mv);
 
-            /*cv::resizeWindow("NTSS", param._width, param._height);
-            cv::imshow("NTSS", preFrame);
-            if ('q' == cv::waitKey())
-                break;*/
             printf("Frame %d\n", i);
         }
     } while (false);
@@ -323,10 +296,12 @@ int main(int argc, char* argv[])
         printf("Oops, something wrong.\n");
     }
     else {
-        printf("Completed.\n");
         std::fstream of("./mv.output", std::fstream::out | std::fstream::trunc);
-        
+        for (std::vector<cv::Mat>::const_iterator it = motionVectors.begin(); it != motionVectors.end(); it++) {
+            of << *it << std::endl;
+        }
         of.close();
+        printf("Completed.\n");
     }
 
     delete[] buffer;
