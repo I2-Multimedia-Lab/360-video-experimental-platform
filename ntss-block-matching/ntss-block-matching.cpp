@@ -8,9 +8,9 @@
 
 struct Option
 {
-    std::string _filename;
-    int _width;
-    int _height;
+    std::string m_filename;
+    int m_width;
+    int m_height;
 
     Option()
     {
@@ -19,12 +19,12 @@ struct Option
 
     void Init()
     {
-        _width = _height = 0;
+        m_width = m_height = 0;
     }
 
     bool IsValid()
     {
-        return (!_filename.empty()) && (_width != 0) && (_height != 0);
+        return (!m_filename.empty()) && (m_width != 0) && (m_height != 0);
     }
 };
 
@@ -41,17 +41,17 @@ bool ParseCmdLineArgs(int argc, char* argv[], Option& opt)
             if (p[1] == 'w' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                opt._width = atoi(q);
+                opt.m_width = atoi(q);
             }
             else if (p[1] == 'h' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                opt._height = atoi(q);
+                opt.m_height = atoi(q);
             }
             else if (p[1] == 'i' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                opt._filename = q;
+                opt.m_filename = q;
             }
         }
 
@@ -242,16 +242,16 @@ int main(int argc, char* argv[])
         return -1;
     }
     
-    FILE* fp = fopen(opt._filename.c_str(), "rb");
+    FILE* fp = fopen(opt.m_filename.c_str(), "rb");
     if (fp == NULL) {
-        printf("Could not open video file %s.\n", opt._filename.c_str());
+        printf("Could not open video file %s.\n", opt.m_filename.c_str());
         return -1;
     }
 
     _fseeki64(fp, 0L, SEEK_END);
     int64_t fileSize = _ftelli64(fp);
-    int64_t yuvSize = opt._width * opt._height * 3 / 2;
-    int64_t ySize = opt._width * opt._height;
+    int64_t yuvSize = opt.m_width * opt.m_height * 3 / 2;
+    int64_t ySize = opt.m_width * opt.m_height;
     int numFrames = (int)(fileSize / yuvSize);
 
     std::vector<cv::Mat> motionVectors(numFrames);
@@ -265,7 +265,7 @@ int main(int argc, char* argv[])
     {
         fread(buffer, yuvSize, 1, fp);
         cv::Mat curFrame;
-        curFrame.create(opt._height, opt._width, CV_8UC1);
+        curFrame.create(opt.m_height, opt.m_width, CV_8UC1);
         memcpy(curFrame.data, buffer, ySize);
         if (curFrame.empty()) {
             error = true;

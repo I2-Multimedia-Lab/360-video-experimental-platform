@@ -6,20 +6,20 @@
 #define DEFAULT_SALT_PEPPER_NOISE_RATIO 0.001
 #define DEFAULT_GAUSSIAN_NOISE_STDDEV 5
 
-enum NoiseType
+enum class NoiseType
 {
-    NoiseType_None = 0,
-    NoiseType_SaltPepper,
-    NoiseType_Gaussian,
+    None = 0,
+    SaltPepper,
+    Gaussian,
 };
 
 struct Option
 {
-    std::string _inputFile;
-    std::string _outputFile;
-    int _width;
-    int _height;
-    NoiseType _type;
+    std::string m_inputFile;
+    std::string m_outputFile;
+    int m_width;
+    int m_height;
+    NoiseType m_type;
 
     Option() 
     {
@@ -28,13 +28,13 @@ struct Option
 
     void Init()
     {
-        _width = _height = 0;
-        _type = NoiseType_None;
+        m_width = m_height = 0;
+        m_type = NoiseType::None;
     }
 
     bool IsValid()
     {
-        return (!_inputFile.empty()) && (_width != 0) && (_height != 0) && (_type != NoiseType_None);
+        return (!m_inputFile.empty()) && (m_width != 0) && (m_height != 0) && (m_type != NoiseType::None);
     }
 };
 
@@ -51,35 +51,35 @@ bool ParseCmdLineArgs(int argc, char* argv[], Option& opt)
             if (p[1] == 'w' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                opt._width = atoi(q);
+                opt.m_width = atoi(q);
             }
             else if (p[1] == 'h' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                opt._height = atoi(q);
+                opt.m_height = atoi(q);
             }
             else if (p[1] == 't' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                opt._type = (NoiseType)atoi(q);
+                opt.m_type = (NoiseType)atoi(q);
             }
             else if (p[1] == 'i' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                opt._inputFile = q;
+                opt.m_inputFile = q;
             }
             else if (p[1] == 'o' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                opt._outputFile = q;
+                opt.m_outputFile = q;
             }
         }
 
     } while (false);
 
-    if (opt._outputFile.empty() || opt._outputFile.compare(opt._inputFile) == 0) {
-        opt._outputFile = opt._inputFile;
-        opt._outputFile += ".out";
+    if (opt.m_outputFile.empty() || opt.m_outputFile.compare(opt.m_inputFile) == 0) {
+        opt.m_outputFile = opt.m_inputFile;
+        opt.m_outputFile += ".out";
     }
 
     return opt.IsValid();
@@ -130,21 +130,21 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    FILE* fpi = fopen(opt._inputFile.c_str(), "rb");
+    FILE* fpi = fopen(opt.m_inputFile.c_str(), "rb");
     if (fpi == NULL) {
-        printf("Could not open input file %s.\n", opt._inputFile.c_str());
+        printf("Could not open input file %s.\n", opt.m_inputFile.c_str());
         return -1;
     }
-    FILE* fpo = fopen(opt._outputFile.c_str(), "wb");
+    FILE* fpo = fopen(opt.m_outputFile.c_str(), "wb");
     if (fpo == NULL) {
-        printf("Could not open output file %s.\n", opt._outputFile.c_str());
+        printf("Could not open output file %s.\n", opt.m_outputFile.c_str());
         fclose(fpi);
         return -1;
     }
 
     _fseeki64(fpi, 0L, SEEK_END);
     int64_t fileSize = _ftelli64(fpi);
-    int64_t frameSize = opt._width * opt._height * 3 / 2;
+    int64_t frameSize = opt.m_width * opt.m_height * 3 / 2;
     int numFrames = (int)(fileSize / frameSize);
 
     _fseeki64(fpi, 0L, SEEK_SET);
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
         fread(buffer, frameSize, 1, fpi);
 
         cv::Mat yuvImg;
-        yuvImg.create(opt._height * 3 / 2, opt._width, CV_8UC1);
+        yuvImg.create(opt.m_height * 3 / 2, opt.m_width, CV_8UC1);
         memcpy(yuvImg.data, buffer, frameSize);
         if (yuvImg.empty()) {
             error = true;
@@ -165,9 +165,9 @@ int main(int argc, char* argv[])
         cv::Mat rgbImg;
         cvtColor(yuvImg, rgbImg, CV_YUV2BGR_I420);
 
-        if (opt._type == NoiseType_SaltPepper)
+        if (opt.m_type == NoiseType::SaltPepper)
             AddSaltPepperNoise(rgbImg, DEFAULT_SALT_PEPPER_NOISE_RATIO);
-        else if (opt._type == NoiseType_Gaussian)
+        else if (opt.m_type == NoiseType::Gaussian)
             AddGuassianNoise(rgbImg, DEFAULT_GAUSSIAN_NOISE_STDDEV);
 
         cvtColor(rgbImg, yuvImg, CV_BGR2YUV_I420);
