@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntss-block-matching", "ntss
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vws-psnr", "vws-psnr\vws-psnr.vcxproj", "{85C92AAD-6F72-4263-8F2F-16E7B02B088C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yuv-splitter", "yuv-splitter\yuv-splitter.vcxproj", "{78C35E8C-1F61-40C0-A85B-5477C131C478}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -35,6 +37,12 @@ Global
 		{85C92AAD-6F72-4263-8F2F-16E7B02B088C}.Release|x64.ActiveCfg = Release|Win32
 		{85C92AAD-6F72-4263-8F2F-16E7B02B088C}.Release|x86.ActiveCfg = Release|Win32
 		{85C92AAD-6F72-4263-8F2F-16E7B02B088C}.Release|x86.Build.0 = Release|Win32
+		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Debug|x64.ActiveCfg = Debug|Win32
+		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Debug|x86.ActiveCfg = Debug|Win32
+		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Debug|x86.Build.0 = Debug|Win32
+		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Release|x64.ActiveCfg = Release|Win32
+		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Release|x86.ActiveCfg = Release|Win32
+		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
