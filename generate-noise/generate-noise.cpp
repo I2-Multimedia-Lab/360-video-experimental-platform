@@ -13,7 +13,7 @@ enum NoiseType
     NoiseType_Gaussian,
 };
 
-struct Parameter
+struct Option
 {
     std::string _inputFile;
     std::string _outputFile;
@@ -21,7 +21,7 @@ struct Parameter
     int _height;
     NoiseType _type;
 
-    Parameter() 
+    Option() 
     {
         Init();
     }
@@ -38,9 +38,9 @@ struct Parameter
     }
 };
 
-bool LoadCmdlineParam(int argc, char* argv[], Parameter& param)
+bool ParseCmdLineArgs(int argc, char* argv[], Option& opt)
 {
-    param.Init();
+    opt.Init();
 
     do {
         for (int i = 0; i < argc; i++) {
@@ -51,38 +51,38 @@ bool LoadCmdlineParam(int argc, char* argv[], Parameter& param)
             if (p[1] == 'w' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                param._width = atoi(q);
+                opt._width = atoi(q);
             }
             else if (p[1] == 'h' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                param._height = atoi(q);
+                opt._height = atoi(q);
             }
             else if (p[1] == 't' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                param._type = (NoiseType)atoi(q);
+                opt._type = (NoiseType)atoi(q);
             }
             else if (p[1] == 'i' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                param._inputFile = q;
+                opt._inputFile = q;
             }
             else if (p[1] == 'o' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
-                param._outputFile = q;
+                opt._outputFile = q;
             }
         }
 
     } while (false);
 
-    if (param._outputFile.empty() || param._outputFile.compare(param._inputFile) == 0) {
-        param._outputFile = param._inputFile;
-        param._outputFile += ".out";
+    if (opt._outputFile.empty() || opt._outputFile.compare(opt._inputFile) == 0) {
+        opt._outputFile = opt._inputFile;
+        opt._outputFile += ".out";
     }
 
-    return param.IsValid();
+    return opt.IsValid();
 }
 
 void Usage()
@@ -124,27 +124,27 @@ void AddGuassianNoise(cv::Mat& img, int stddev)
 
 int main(int argc, char* argv[])
 {
-    Parameter param;
-    if (!LoadCmdlineParam(argc, argv, param)) {
+    Option opt;
+    if (!ParseCmdLineArgs(argc, argv, opt)) {
         Usage();
         return -1;
     }
 
-    FILE* fpi = fopen(param._inputFile.c_str(), "rb");
+    FILE* fpi = fopen(opt._inputFile.c_str(), "rb");
     if (fpi == NULL) {
-        printf("Could not open input file %s.\n", param._inputFile.c_str());
+        printf("Could not open input file %s.\n", opt._inputFile.c_str());
         return -1;
     }
-    FILE* fpo = fopen(param._outputFile.c_str(), "wb");
+    FILE* fpo = fopen(opt._outputFile.c_str(), "wb");
     if (fpo == NULL) {
-        printf("Could not open output file %s.\n", param._outputFile.c_str());
+        printf("Could not open output file %s.\n", opt._outputFile.c_str());
         fclose(fpi);
         return -1;
     }
 
     _fseeki64(fpi, 0L, SEEK_END);
     int64_t fileSize = _ftelli64(fpi);
-    int64_t frameSize = param._width * param._height * 3 / 2;
+    int64_t frameSize = opt._width * opt._height * 3 / 2;
     int numFrames = (int)(fileSize / frameSize);
 
     _fseeki64(fpi, 0L, SEEK_SET);
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
         fread(buffer, frameSize, 1, fpi);
 
         cv::Mat yuvImg;
-        yuvImg.create(param._height * 3 / 2, param._width, CV_8UC1);
+        yuvImg.create(opt._height * 3 / 2, opt._width, CV_8UC1);
         memcpy(yuvImg.data, buffer, frameSize);
         if (yuvImg.empty()) {
             error = true;
@@ -165,9 +165,9 @@ int main(int argc, char* argv[])
         cv::Mat rgbImg;
         cvtColor(yuvImg, rgbImg, CV_YUV2BGR_I420);
 
-        if (param._type == NoiseType_SaltPepper)
+        if (opt._type == NoiseType_SaltPepper)
             AddSaltPepperNoise(rgbImg, DEFAULT_SALT_PEPPER_NOISE_RATIO);
-        else if (param._type == NoiseType_Gaussian)
+        else if (opt._type == NoiseType_Gaussian)
             AddGuassianNoise(rgbImg, DEFAULT_GAUSSIAN_NOISE_STDDEV);
 
         cvtColor(rgbImg, yuvImg, CV_BGR2YUV_I420);
