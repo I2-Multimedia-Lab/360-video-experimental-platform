@@ -13,34 +13,24 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yuv-splitter", "yuv-splitte
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{105831A4-3333-4C00-AFB0-13862A772398}.Debug|x64.ActiveCfg = Debug|Win32
 		{105831A4-3333-4C00-AFB0-13862A772398}.Debug|x86.ActiveCfg = Debug|Win32
 		{105831A4-3333-4C00-AFB0-13862A772398}.Debug|x86.Build.0 = Debug|Win32
-		{105831A4-3333-4C00-AFB0-13862A772398}.Release|x64.ActiveCfg = Release|Win32
 		{105831A4-3333-4C00-AFB0-13862A772398}.Release|x86.ActiveCfg = Release|Win32
 		{105831A4-3333-4C00-AFB0-13862A772398}.Release|x86.Build.0 = Release|Win32
-		{062549C1-3EE4-4AD0-887F-A8C870CF7EC0}.Debug|x64.ActiveCfg = Debug|Win32
 		{062549C1-3EE4-4AD0-887F-A8C870CF7EC0}.Debug|x86.ActiveCfg = Debug|Win32
 		{062549C1-3EE4-4AD0-887F-A8C870CF7EC0}.Debug|x86.Build.0 = Debug|Win32
-		{062549C1-3EE4-4AD0-887F-A8C870CF7EC0}.Release|x64.ActiveCfg = Release|Win32
 		{062549C1-3EE4-4AD0-887F-A8C870CF7EC0}.Release|x86.ActiveCfg = Release|Win32
 		{062549C1-3EE4-4AD0-887F-A8C870CF7EC0}.Release|x86.Build.0 = Release|Win32
-		{85C92AAD-6F72-4263-8F2F-16E7B02B088C}.Debug|x64.ActiveCfg = Debug|Win32
 		{85C92AAD-6F72-4263-8F2F-16E7B02B088C}.Debug|x86.ActiveCfg = Debug|Win32
 		{85C92AAD-6F72-4263-8F2F-16E7B02B088C}.Debug|x86.Build.0 = Debug|Win32
-		{85C92AAD-6F72-4263-8F2F-16E7B02B088C}.Release|x64.ActiveCfg = Release|Win32
 		{85C92AAD-6F72-4263-8F2F-16E7B02B088C}.Release|x86.ActiveCfg = Release|Win32
 		{85C92AAD-6F72-4263-8F2F-16E7B02B088C}.Release|x86.Build.0 = Release|Win32
-		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Debug|x64.ActiveCfg = Debug|Win32
 		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Debug|x86.ActiveCfg = Debug|Win32
 		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Debug|x86.Build.0 = Debug|Win32
-		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Release|x64.ActiveCfg = Release|Win32
 		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Release|x86.ActiveCfg = Release|Win32
 		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
