@@ -13,8 +13,8 @@ public:
     bool IsValid() const;
 
 public:
-    std::string m_tFilename;
-    std::string m_rFilename;
+    std::string m_srcFilename;
+    std::string m_dstFilename;
     int m_width;
     int m_height;
     int m_fps;

@@ -27,6 +27,18 @@
     <ClInclude Include="vws_psnr_config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="vws_psnr_tube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vws_psnr_segment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vws_psnr_frame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vws_psnr_block.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -39,6 +51,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="vws_psnr_config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vws_psnr_tube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vws_psnr_segment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vws_psnr_frame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vws_psnr_block.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

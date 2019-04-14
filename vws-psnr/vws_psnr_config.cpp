@@ -18,15 +18,13 @@ VWSPSNRConfig::~VWSPSNRConfig()
 void VWSPSNRConfig::Usage()
 {
     char* help_str =
-        "Usage: vws-psnr.exe [options...] -t target_file -r ref_file\n"
+        "Usage: vws-psnr.exe [options...] reference_file distorted_file\n"
         "Option:\n"
         "   -w, width of video\n"
         "   -h, height of video\n"
-        "   -t, target file name\n"
-        "   -r, reference file name\n"
         "   -f, frames per second, default 30 if not set\n"
         "\n"
-        "Example: vws-psnr -w 720 -h 480 -t target.yuv -r origin.yuv\n";
+        "Example: vws-psnr -w 4096 -h 2048 origin.yuv impaired.mp4\n";
 
     printf(help_str);
 }
@@ -36,36 +34,43 @@ bool VWSPSNRConfig::ParseFromCmdLineArgs(int argc, char* argv[])
     if (argc <= 1 && argv == NULL)
         return false;
 
-    for (int i = 0; i < argc; i++) {
+    bool haveSrc = false;
+    bool haveDst = false;
+    for (int i = 1; i < argc; i++) {
         const char* p = argv[i];
-        if (p[0] != '-')
+        if (p[0] == '-') {
+            if (p[1] == 'w' && p[2] == '\0') {
+                i++;
+                const char* q = argv[i];
+                m_width = atoi(q);
+            }
+            else if (p[1] == 'h' && p[2] == '\0') {
+                i++;
+                const char* q = argv[i];
+                m_height = atoi(q);
+            }
+            else if (p[1] == 'f' && p[2] == '\0') {
+                i++;
+                const char* q = argv[i];
+                m_fps = atoi(q);
+            }
             continue;
+        }
+        
+        if (!haveSrc) {  // reference file
+            const char* q = argv[i];
+            m_srcFilename = q;
+            haveSrc = true;
+            continue;
+        }
+        if (!haveDst) {  // processed file
+            const char* q = argv[i];
+            m_dstFilename = q;
+            haveDst = true;
+            continue;
+        }
 
-        if (p[1] == 'w' && p[2] == '\0') {
-            i++;
-            const char* q = argv[i];
-            m_width = atoi(q);
-        }
-        else if (p[1] == 'h' && p[2] == '\0') {
-            i++;
-            const char* q = argv[i];
-            m_height = atoi(q);
-        }
-        else if (p[1] == 't' && p[2] == '\0') {
-            i++;
-            const char* q = argv[i];
-            m_tFilename = q;
-        }
-        else if (p[1] == 'r' && p[2] == '\0') {
-            i++;
-            const char* q = argv[i];
-            m_rFilename = q;
-        }
-        else if (p[1] == 'f' && p[2] == '\0') {
-            i++;
-            const char* q = argv[i];
-            m_fps = atoi(q);
-        }
+        //return false;
     }
 
     return IsValid();
@@ -73,8 +78,8 @@ bool VWSPSNRConfig::ParseFromCmdLineArgs(int argc, char* argv[])
 
 bool VWSPSNRConfig::IsValid() const
 {
-    return !m_tFilename.empty() 
-        && !m_rFilename.empty() 
+    return !m_srcFilename.empty()
+        && !m_dstFilename.empty()
         && m_width != 0 
         && m_height != 0;
 }

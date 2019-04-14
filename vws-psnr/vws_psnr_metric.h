@@ -1,6 +1,8 @@
 #pragma once
 
 #include "vws_psnr_config.h"
+#include "vws_psnr_tube.h"
+#include "vws_psnr_frame.h"
 
 class VWSPSNRMetric
 {
@@ -11,16 +13,25 @@ public:
     bool LoadConfig(const VWSPSNRConfig& config);
     bool Init();
     bool Run();
+    void Output();
 
 private:
     void Cleanup();
 
+    bool ReadFrameFromSrc(cv::Mat& frame);
+    bool ReadFrameFromDst(cv::Mat& frame);
+
 private:
     VWSPSNRConfig m_config;
-    FILE* m_fpt;
-    FILE* m_fpr;
+    FILE* m_fpSrc;
+    FILE* m_fpDst;
+    cv::VideoCapture m_vcDst;
     int m_yuvSize;
     int m_ySize;
     int m_numFrames;
+    bool m_dstNotYuv;
+    uint8_t* m_buffer;
+    std::vector<VWSPSNRFrame> m_frames;
+    double m_globalDistortion;
 };
 

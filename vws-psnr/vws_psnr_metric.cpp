@@ -1,13 +1,16 @@
 #include "stdafx.h"
 #include "vws_psnr_metric.h"
-
+#include "vws_psnr_segment.h"
 
 VWSPSNRMetric::VWSPSNRMetric()
-    : m_fpt(NULL)
-    , m_fpr(NULL)
+    : m_fpSrc(NULL)
+    , m_fpDst(NULL)
     , m_yuvSize(0)
     , m_ySize(0)
     , m_numFrames(0)
+    , m_dstNotYuv(false)
+    , m_buffer(NULL)
+    , m_globalDistortion(0.0)
 {
 }
 
@@ -31,46 +34,144 @@ bool VWSPSNRMetric::Init()
 {
     Cleanup();
 
-    m_fpt = fopen(m_config.m_tFilename.c_str(), "rb");
-    if (m_fpt == NULL)
+    const std::string& srcFilename = m_config.m_srcFilename;
+    const std::string& dstFilename = m_config.m_dstFilename;
+
+    assert(srcFilename.substr(srcFilename.length() - 4) == ".yuv");
+
+    m_fpSrc = fopen(srcFilename.c_str(), "rb");
+    if (m_fpSrc == NULL)
         return false;
 
-    m_fpr = fopen(m_config.m_rFilename.c_str(), "rb");
-    if (m_fpr == NULL)
-        return false;
+    if (dstFilename.substr(dstFilename.length() - 4) != ".yuv") {
+        m_dstNotYuv = true;
+        if (!m_vcDst.open(dstFilename))
+            return false;
+    }
+    else {
+        m_fpDst = fopen(dstFilename.c_str(), "rb");
+        if (m_fpDst == NULL)
+            return false;
+    }
 
-    _fseeki64(m_fpt, 0L, SEEK_END);
-    int64_t tFileSize = _ftelli64(m_fpt);
-    _fseeki64(m_fpr, 0L, SEEK_END);
-    int64_t rFileSize = _ftelli64(m_fpr);
-    CV_Assert(tFileSize == rFileSize);
+    _fseeki64(m_fpSrc, 0L, SEEK_END);
+    int64_t srcFileSize = _ftelli64(m_fpSrc);
 
     m_yuvSize = m_config.m_width * m_config.m_height * 3 / 2;
     m_ySize = m_config.m_width * m_config.m_height;
-    int numFrames = (int)(tFileSize / m_yuvSize);
+    m_numFrames = (int)(srcFileSize / m_yuvSize);
+    _fseeki64(m_fpSrc, 0L, SEEK_SET);
+
+    m_buffer = new uint8_t[m_yuvSize];
+
+    m_frames.reserve(m_numFrames);
 
     return true;
 }
 
 void VWSPSNRMetric::Cleanup()
 {
-    if (m_fpt != NULL) {
-        fclose(m_fpt);
-        m_fpt = NULL;
+    if (m_fpSrc != NULL) {
+        fclose(m_fpSrc);
+        m_fpSrc = NULL;
     }
     
-    if (m_fpr != NULL) {
-        fclose(m_fpr);
-        m_fpr = NULL;
+    if (m_fpDst != NULL) {
+        fclose(m_fpDst);
+        m_fpDst = NULL;
     }
+
+    m_vcDst.release();
 
     m_yuvSize = m_ySize = 0;
     m_numFrames = 0;
+    m_dstNotYuv = false;
+
+    if (m_buffer != NULL) {
+        delete[] m_buffer;
+        m_buffer = NULL;
+    }
+
+    m_frames.clear();
+
+    m_globalDistortion = 0.0;
 }
 
 bool VWSPSNRMetric::Run()
 {
+    VWSPSNRSegment segment(m_config.m_width, m_config.m_height, m_config.m_fps);  // some kind of cache
+    cv::Mat frameSrc;
+    cv::Mat frameDst;
+    bool r = false;
+    for (int i = 0; i < m_numFrames; i++) {
+        printf("Frame %d ", i);
+        clock_t start = clock();
 
+        r = ReadFrameFromSrc(frameSrc);
+        assert(r);
+
+        r = ReadFrameFromDst(frameDst);
+        assert(r);
+
+        segment.PushSrc(frameSrc);
+        segment.PushDst(frameDst);
+        
+        segment.Process();
+
+        m_frames.push_back(segment.GetFrame());
+
+        clock_t end = clock();
+        printf(" %.2lf  %.1lfs\n", segment.GetFrame().GetDistortion(), (double)(end - start) / CLOCKS_PER_SEC);
+    }
+
+    m_globalDistortion = 0.0;
+    for (int i = 0; i < m_numFrames; i++) {
+        const VWSPSNRFrame& frame = segment.GetFrame();
+        m_globalDistortion += frame.GetDistortion();
+    }
+    m_globalDistortion /= m_numFrames;
 
     return true;
+}
+
+bool VWSPSNRMetric::ReadFrameFromSrc(cv::Mat& frame)
+{
+    assert(m_fpSrc != NULL);
+
+    if (fread(m_buffer, m_yuvSize, 1, m_fpSrc) != 1)
+        return false;
+
+    frame.create(m_config.m_height, m_config.m_width, CV_8UC1);
+    memcpy(frame.data, m_buffer, m_ySize);
+
+    return true;
+}
+
+bool VWSPSNRMetric::ReadFrameFromDst(cv::Mat& frame)
+{
+    if (m_dstNotYuv) {
+        assert(m_vcDst.isOpened());
+
+        if (!m_vcDst.read(frame))
+            return false;
+
+        // extract Y channel
+        cv::extractChannel(frame, frame, 0);
+    }
+    else {
+        assert(m_fpDst != NULL);
+
+        if (fread(m_buffer, m_yuvSize, 1, m_fpDst) != 1)
+            return false;
+
+        frame.create(m_config.m_height, m_config.m_width, CV_8UC1);
+        memcpy(frame.data, m_buffer, m_ySize);
+    }
+        
+    return true;
+}
+
+void VWSPSNRMetric::Output()
+{
+    printf("The global score is %.2lf \n", m_globalDistortion);
 }

@@ -13,18 +13,20 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    VWSPSNRMetric vws_pnsr;
-    if (!vws_pnsr.LoadConfig(config)) {
+    VWSPSNRMetric metric;
+    if (!metric.LoadConfig(config)) {
         printf("Invalid config.\n");
         return -1;
     }
 
-    if (!vws_pnsr.Init()) {
+    if (!metric.Init()) {
         printf("Init failed.\n");
         return -1;
     }
 
-    vws_pnsr.Run();
+    metric.Run();
+
+    metric.Output();
 
     return 0;
 }

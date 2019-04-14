@@ -11,5 +11,10 @@
 #include <tchar.h>
 
 #include <string>
+#include <vector>
+#include <deque>
+
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 #include <opencv2\opencv.hpp>
