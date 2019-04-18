@@ -64,7 +64,7 @@ bool VWSPSNRMetric::Init()
 
     m_buffer = new uint8_t[m_yuvSize];
 
-    m_frames.reserve(m_numFrames);
+    m_frameDistortions.reserve(m_numFrames);
 
     return true;
 }
@@ -92,7 +92,7 @@ void VWSPSNRMetric::Cleanup()
         m_buffer = NULL;
     }
 
-    m_frames.clear();
+    m_frameDistortions.clear();
 
     m_globalDistortion = 0.0;
 }
@@ -118,16 +118,17 @@ bool VWSPSNRMetric::Run()
         
         segment.Process();
 
-        m_frames.push_back(segment.GetFrame());
+        double frameDistortion = segment.GetFrame().GetDistortion();
+        m_frameDistortions.push_back(frameDistortion);
 
         clock_t end = clock();
-        printf(" %.2lf  %.1lfs\n", segment.GetFrame().GetDistortion(), (double)(end - start) / CLOCKS_PER_SEC);
+        printf(" %.2lf  %.1lfs\n", frameDistortion, (double)(end - start) / CLOCKS_PER_SEC);
     }
 
     m_globalDistortion = 0.0;
     for (int i = 0; i < m_numFrames; i++) {
-        const VWSPSNRFrame& frame = segment.GetFrame();
-        m_globalDistortion += frame.GetDistortion();
+        double frameDistortion = m_frameDistortions[i];
+        m_globalDistortion += frameDistortion;
     }
     m_globalDistortion /= m_numFrames;
 

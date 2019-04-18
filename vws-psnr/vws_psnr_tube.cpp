@@ -12,7 +12,7 @@ VWSPSNRTube::VWSPSNRTube()
 
 VWSPSNRTube::~VWSPSNRTube()
 {
-
+    Cleanup();
 }
 
 void VWSPSNRTube::Cleanup()

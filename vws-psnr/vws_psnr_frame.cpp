@@ -11,7 +11,7 @@ VWSPSNRFrame::VWSPSNRFrame()
 
 VWSPSNRFrame::~VWSPSNRFrame()
 {
-
+    Cleanup();
 }
 
 void VWSPSNRFrame::Cleanup()
@@ -28,8 +28,10 @@ void VWSPSNRFrame::InitTubeMap(int rows, int cols)
     m_tubeRows = rows;
     m_tubeCols = cols;
     int newSize = m_tubeRows * m_tubeCols;
-    if (m_tubeMap.size() != newSize)
+    if (m_tubeMap.size() != newSize) {
         m_tubeMap.resize(newSize);
+        m_tubeMap.shrink_to_fit();
+    }
 }
 
 VWSPSNRTube& VWSPSNRFrame::GetTube(int x, int y)

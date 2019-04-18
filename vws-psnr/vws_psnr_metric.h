@@ -31,7 +31,7 @@ private:
     int m_numFrames;
     bool m_dstNotYuv;
     uint8_t* m_buffer;
-    std::vector<VWSPSNRFrame> m_frames;
+    std::vector<double> m_frameDistortions;
     double m_globalDistortion;
 };
 
