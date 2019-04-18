@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vws-psnr", "vws-psnr\vws-ps
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yuv-splitter", "yuv-splitter\yuv-splitter.vcxproj", "{78C35E8C-1F61-40C0-A85B-5477C131C478}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ws-psnr", "ws-psnr\ws-psnr.vcxproj", "{EDC72272-567A-4AEB-AB4D-52503EE42301}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -33,6 +35,10 @@ Global
 		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Debug|x64.Build.0 = Debug|x64
 		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Release|x64.ActiveCfg = Release|x64
 		{78C35E8C-1F61-40C0-A85B-5477C131C478}.Release|x64.Build.0 = Release|x64
+		{EDC72272-567A-4AEB-AB4D-52503EE42301}.Debug|x64.ActiveCfg = Debug|x64
+		{EDC72272-567A-4AEB-AB4D-52503EE42301}.Debug|x64.Build.0 = Debug|x64
+		{EDC72272-567A-4AEB-AB4D-52503EE42301}.Release|x64.ActiveCfg = Release|x64
+		{EDC72272-567A-4AEB-AB4D-52503EE42301}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
