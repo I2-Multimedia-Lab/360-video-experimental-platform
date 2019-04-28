@@ -105,14 +105,14 @@ public:
             m_fp = fopen(m_filename.c_str(), "rb");
             if (m_fp == NULL)
                 return false;
+
+            int64_t yuvSize = m_width * m_height * 3 / 2;
+            m_buffer = new uint8_t[yuvSize];
         }
         else {
             if (!m_vc.open(m_filename))
                 return false;
         }
-
-        int64_t yuvSize = m_width * m_height * 3 / 2;
-        m_buffer = new uint8_t[yuvSize];
 
         return true;
     }
@@ -127,6 +127,7 @@ public:
         m_vc.release();
 
         delete[] m_buffer;
+        m_buffer = NULL;
     }
 
     bool Read(cv::Mat& img)
@@ -144,8 +145,8 @@ public:
             if (!m_vc.read(img))
                 return false;
 
-            // extract Y channel
-            cv::extractChannel(img, img, 0);
+            cv::cvtColor(img, img, cv::COLOR_BGRA2YUV_I420); // i cant figure out from ? to yuv420, just guess
+            img = img(cv::Rect(0, 0, m_width, m_height));
         }
 
         return true;
