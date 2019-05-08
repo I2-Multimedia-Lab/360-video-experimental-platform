@@ -174,7 +174,7 @@ double VWSPSNRTube::MAD(cv::InputArray s1, cv::InputArray s2)
     return mad;
 }
 
-double VWSPSNRTube::TemporalDistortion(double mg, int sc)
+double VWSPSNRTube::TemporalDistortionCoefficient(double mg, int sc)
 {
     double g = 16;
     double mean = 1;
@@ -218,8 +218,8 @@ double VWSPSNRTube::Compute(const std::deque<cv::Mat>& diffMapQueue, const cv::M
         pg = cg;
     }
 
-    double td = TemporalDistortion(mg, sc);
-    m_distortion = d * (1 + td);
+    double tdc = TemporalDistortionCoefficient(mg, sc);
+    m_distortion = d * (1 + tdc);
 
     return m_distortion;
 }
