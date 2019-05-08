@@ -18,6 +18,7 @@ private:
     bool MatchBlock(const cv::Mat& c, const cv::Mat& r, cv::Rect& rc);
     cv::Mat1d Match(const cv::Mat& c, const cv::Mat& r, const cv::Point& center, const cv::Point& target, int step = 1, bool skipNOC = false);
     double MAD(cv::InputArray s1, cv::InputArray s2);
+    double TemporalDistortion(double mg, int sc);
 
 private:
     std::deque<VWSPSNRBlock> m_blocks;

@@ -5,6 +5,7 @@ VWSPSNRFrame::VWSPSNRFrame()
     : m_tubeRows(0)
     , m_tubeCols(0)
     , m_distortion(0.0)
+    , m_psnr(0.0)
 {
 
 }
@@ -19,6 +20,7 @@ void VWSPSNRFrame::Cleanup()
     m_tubeRows = m_tubeCols = 0;
     m_tubeMap.clear();
     m_distortion = 0.0;
+    m_psnr = 0.0;
 }
 
 void VWSPSNRFrame::InitTubeMap(int rows, int cols)
@@ -57,10 +59,16 @@ double VWSPSNRFrame::Pool()
     m_distortion /= m_tubeMap.size();
     m_distortion = sqrt(m_distortion);
 
-    return m_distortion;
+    m_psnr = 10 * log10(255 * 255 / (m_distortion + DBL_EPSILON));
+    return m_psnr;
 }
 
 double VWSPSNRFrame::GetDistortion() const
 {
     return m_distortion;
+}
+
+double VWSPSNRFrame::GetPSNR() const
+{
+    return m_psnr;
 }

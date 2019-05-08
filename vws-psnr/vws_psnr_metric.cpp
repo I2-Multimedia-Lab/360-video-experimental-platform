@@ -10,7 +10,7 @@ VWSPSNRMetric::VWSPSNRMetric()
     , m_numFrames(0)
     , m_dstNotYuv(false)
     , m_buffer(NULL)
-    , m_globalDistortion(0.0)
+    , m_globalPSNR(0.0)
 {
 }
 
@@ -45,8 +45,10 @@ bool VWSPSNRMetric::Init()
 
     if (dstFilename.substr(dstFilename.length() - 4) != ".yuv") {
         m_dstNotYuv = true;
-        if (!m_vcDst.open(dstFilename))
-            return false;
+        printf("Non-YUV file is not supported.\n");
+        /*if (!m_vcDst.open(dstFilename))
+            return false;*/
+        return false;
     }
     else {
         m_fpDst = fopen(dstFilename.c_str(), "rb");
@@ -63,8 +65,6 @@ bool VWSPSNRMetric::Init()
     _fseeki64(m_fpSrc, 0L, SEEK_SET);
 
     m_buffer = new uint8_t[m_yuvSize];
-
-    m_frameDistortions.reserve(m_numFrames);
 
     return true;
 }
@@ -92,14 +92,13 @@ void VWSPSNRMetric::Cleanup()
         m_buffer = NULL;
     }
 
-    m_frameDistortions.clear();
-
-    m_globalDistortion = 0.0;
+    m_globalPSNR = 0.0;
 }
 
 bool VWSPSNRMetric::Run()
 {
     VWSPSNRSegment segment(m_config.m_width, m_config.m_height, m_config.m_fps);  // some kind of cache
+
     cv::Mat frameSrc;
     cv::Mat frameDst;
     bool r = false;
@@ -118,19 +117,13 @@ bool VWSPSNRMetric::Run()
         
         segment.Process();
 
-        double frameDistortion = segment.GetFrame().GetDistortion();
-        m_frameDistortions.push_back(frameDistortion);
+        double framePSNR = segment.GetFrame().GetPSNR();
+        m_globalPSNR += framePSNR;
 
         clock_t end = clock();
-        printf(" %.2lf  %.1lfs\n", frameDistortion, (double)(end - start) / CLOCKS_PER_SEC);
+        printf(" %.2lf  %.1lfs\n", framePSNR, (double)(end - start) / CLOCKS_PER_SEC);
     }
-
-    m_globalDistortion = 0.0;
-    for (int i = 0; i < m_numFrames; i++) {
-        double frameDistortion = m_frameDistortions[i];
-        m_globalDistortion += frameDistortion;
-    }
-    m_globalDistortion /= m_numFrames;
+    m_globalPSNR /= m_numFrames;
 
     return true;
 }
@@ -149,7 +142,7 @@ bool VWSPSNRMetric::ReadFrameFromSrc(cv::Mat& frame)
 }
 
 bool VWSPSNRMetric::ReadFrameFromDst(cv::Mat& frame)
-{
+{ 
     if (m_dstNotYuv) {
         assert(m_vcDst.isOpened());
 
@@ -174,5 +167,5 @@ bool VWSPSNRMetric::ReadFrameFromDst(cv::Mat& frame)
 
 void VWSPSNRMetric::Output()
 {
-    printf("The global score is %.2lf \n", m_globalDistortion);
+    printf("The global score is %.2lf\n", m_globalPSNR);
 }

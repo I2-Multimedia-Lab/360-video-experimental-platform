@@ -31,10 +31,11 @@ double VWSPSNRBlock::Compute(const cv::Mat& diffMap, const cv::Mat& weightMap)
 
     cv::Mat blockWeightedDiff = blockDiffMap.mul(blockWeightMap);
 
+    double t = cv::sum(blockWeightedDiff)[0];
     double WMSE = cv::sum(blockWeightedDiff)[0] / cv::sum(blockWeightMap)[0];
-    double WSPSNR = 10 * log10(255 * 255 / (WMSE + DBL_EPSILON));
+    //double WSPSNR = 10 * log10(255 * 255 / (WMSE + DBL_EPSILON));
 
-    m_distortion = WSPSNR;
+    m_distortion = WMSE;
 
     return m_distortion;
 }

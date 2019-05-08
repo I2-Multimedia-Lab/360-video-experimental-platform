@@ -2,7 +2,7 @@
 #include "vws_psnr_tube.h"
 
 #define SEARCH_PARAM 7
-#define DISTORTION_GRADIENT_THRESHOLD 10
+#define DISTORTION_GRADIENT_THRESHOLD 2.5
 
 VWSPSNRTube::VWSPSNRTube()
     : m_distortion(0.0)
@@ -174,31 +174,52 @@ double VWSPSNRTube::MAD(cv::InputArray s1, cv::InputArray s2)
     return mad;
 }
 
+double VWSPSNRTube::TemporalDistortion(double mg, int sc)
+{
+    double g = 16;
+    double mean = 1;
+    double sigma = 6.2;
+    return mg * g * exp(-pow((sc - mean), 2) / (2 * pow(sigma, 2))) / (sigma * sqrt(2 * M_PI));
+}
+
 double VWSPSNRTube::Compute(const std::deque<cv::Mat>& diffMapQueue, const cv::Mat& weightMap, int interval)
 {
     assert(diffMapQueue.size() == m_blocks.size());
 
-    double s;
-    double pd, cd;
-    for (size_t i = 0; i < m_blocks.size(); i++) {
+    double pd, cd, d; // distortion
+    double pg, cg, mg; // distortion gradient
+    int sc = 0; // sign changes of the distortion gradient
+
+    for (int i = (int)m_blocks.size() - 1; i >= 0; i--) {
         VWSPSNRBlock& block = m_blocks[i];
         const cv::Mat& diffMap = diffMapQueue[i];
 
         cd = block.Compute(diffMap, weightMap);
 
         //  recursive filter
-        if (i == 0) {
-            s = cd;
+        if (i == (int)m_blocks.size() - 1) {
+            d = cd;
+            pg = cg = mg = 0.0;
         }
         else {
-            double gradient = abs(cd - pd) * 1000 / interval;
-            double alpha = (gradient > DISTORTION_GRADIENT_THRESHOLD) ? (interval / 200.0) : (interval / 400.0); // decided by distortion gradient 
-            s = alpha * cd + (1 - alpha) * s;
+            cg = (cd - pd) / interval;
+            double acg = abs(cg);
+
+            double alpha = (acg > DISTORTION_GRADIENT_THRESHOLD) ? (interval / 200.0) : (interval / 400.0); // decided by distortion gradient 
+            d = alpha * cd + (1 - alpha) * d;
+
+            if ((cg < 0.0) != (pg < 0.0))
+                sc++;
+            if (acg > DISTORTION_GRADIENT_THRESHOLD && acg > mg)
+                mg = acg;
         }
 
         pd = cd;
+        pg = cg;
     }
-    m_distortion = s;
+
+    double td = TemporalDistortion(mg, sc);
+    m_distortion = d * (1 + td);
 
     return m_distortion;
 }
