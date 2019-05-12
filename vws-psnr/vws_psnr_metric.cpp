@@ -101,6 +101,7 @@ bool VWSPSNRMetric::Run()
 
     cv::Mat frameSrc;
     cv::Mat frameDst;
+    double globalDistortion = 0.0;
     bool r = false;
     for (int i = 0; i < m_numFrames; i++) {
         printf("Frame %d ", i);
@@ -117,13 +118,14 @@ bool VWSPSNRMetric::Run()
         
         segment.Process();
 
-        double framePSNR = segment.GetFrame().GetPSNR();
-        m_globalPSNR += framePSNR;
+        globalDistortion += segment.GetFrame().GetDistortion();
 
         clock_t end = clock();
-        printf(" %.2lf  %.1lfs\n", framePSNR, (double)(end - start) / CLOCKS_PER_SEC);
+        printf(" %.2lf %.1lfs\n", segment.GetFrame().GetPSNR(), (double)(end - start) / CLOCKS_PER_SEC);
     }
-    m_globalPSNR /= m_numFrames;
+    globalDistortion /= m_numFrames;
+
+    m_globalPSNR = 10 * log10(255 * 255 / (globalDistortion + DBL_EPSILON));
 
     return true;
 }
