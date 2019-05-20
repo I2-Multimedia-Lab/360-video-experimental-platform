@@ -3,6 +3,7 @@
 
 #define SEARCH_PARAM 7
 #define DISTORTION_GRADIENT_THRESHOLD 2.5
+#define BETA 0.3
 
 VWSPSNRTube::VWSPSNRTube()
     : m_distortion(0.0)
@@ -219,7 +220,7 @@ double VWSPSNRTube::Compute(const std::deque<cv::Mat>& diffMapQueue, const cv::M
     }
 
     double tdc = TemporalDistortionCoefficient(mg, sc);
-    m_distortion = d * (1 + tdc);
+    m_distortion = d * (1 + BETA * tdc);
 
     return m_distortion;
 }
