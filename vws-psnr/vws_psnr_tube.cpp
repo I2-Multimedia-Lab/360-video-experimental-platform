@@ -3,7 +3,7 @@
 
 #define SEARCH_PARAM 7
 #define DISTORTION_GRADIENT_THRESHOLD 2.5
-#define BETA 0.3
+#define BETA 1.0
 
 VWSPSNRTube::VWSPSNRTube()
     : m_distortion(0.0)

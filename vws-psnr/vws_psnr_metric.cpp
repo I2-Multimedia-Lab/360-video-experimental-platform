@@ -97,7 +97,7 @@ void VWSPSNRMetric::Cleanup()
 
 bool VWSPSNRMetric::Run()
 {
-    VWSPSNRSegment segment(m_config.m_width, m_config.m_height, m_config.m_fps);  // some kind of cache
+    VWSPSNRSegment segment(m_config.m_width, m_config.m_height, m_config.m_fps);  // kind of cache
 
     cv::Mat frameSrc;
     cv::Mat frameDst;
