@@ -8,7 +8,7 @@
 * ws-psnr
 * vws-psnr
 
-### Block Searching Algorithm
+### Block Matching Algorithm
 
 * ntss-block-matching
 
