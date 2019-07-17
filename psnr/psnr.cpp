@@ -66,14 +66,14 @@ bool ParseCmdLineArgs(int argc, char* argv[], Option& opt)
 void Usage()
 {
     char* help_str =
-        "Usage: ws-psnr.exe [options...] -o reference_file -r processed_file\n"
+        "Usage: psnr.exe [options...] -o reference_file -r processed_file\n"
         "Option:\n"
         "   -w, width of video\n"
         "   -h, height of video\n"
         "   -o, reference file name\n"
         "   -r, processed file name\n"
         "\n"
-        "Example: generate-noise.exe -w 720 -h 480 -t 2 -i origin.yuv -o impaired.yuv\n";
+        "Example: psnr.exe -w 720 -h 480 -t 2 -i origin.yuv -o impaired.yuv\n";
 
     printf(help_str);
 }

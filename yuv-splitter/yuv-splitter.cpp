@@ -87,7 +87,7 @@ void Usage()
         "   -o, output file name\n"
         "   -f x:x, frame range to be splitted (1 is first frame, -1 is the last)\n"
         "\n"
-        "Example: yuv-splitter -w 720 -h 480 -f 1:30 -i input.yuv -o output.yuv \n";
+        "Example: yuv-splitter.exe -w 720 -h 480 -f 1:30 -i input.yuv -o output.yuv \n";
 
     printf(help_str);
 }

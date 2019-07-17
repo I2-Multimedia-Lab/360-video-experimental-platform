@@ -24,7 +24,7 @@ void VWSPSNRConfig::Usage()
         "   -h, height of video\n"
         "   -f, frames per second, default 30 if not set\n"
         "\n"
-        "Example: vws-psnr -w 4096 -h 2048 origin.yuv impaired.yuv\n";
+        "Example: vws-psnr.exe -w 4096 -h 2048 origin.yuv impaired.yuv\n";
 
     printf(help_str);
 }
