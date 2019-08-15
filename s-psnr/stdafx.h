@@ -1,0 +1,22 @@
+// stdafx.h : include file for standard system include files,
+// or project specific include files that are used frequently, but
+// are changed infrequently
+//
+
+#pragma once
+
+#include "targetver.h"
+
+#include <stdio.h>
+#include <tchar.h>
+
+#include <string>
+#include <vector>
+
+#include <opencv2\opencv.hpp>
+
+using String = std::string;
+using Image = cv::Mat;
+using Vec2f = std::vector<cv::Point2f>;
+using Vec3f = std::vector<cv::Point3f>;
+using Vec1b = std::vector<unsigned char>;
