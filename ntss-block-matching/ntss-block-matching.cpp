@@ -6,13 +6,13 @@
 #define BLOCK_SIZE 16
 #define SEARCH_PARAM 7
 
-struct Option
+struct Config
 {
     std::string m_filename;
     int m_width;
     int m_height;
 
-    Option()
+    Config()
     {
         Init();
     }
@@ -28,7 +28,7 @@ struct Option
     }
 };
 
-bool ParseCmdLineArgs(int argc, char* argv[], Option& opt)
+bool ParseCmdLineArgs(int argc, char* argv[], Config& opt)
 {
     opt.Init();
 
@@ -236,22 +236,22 @@ bool EstimateMotionVector(const cv::Mat& c, const cv::Mat& r, cv::Mat& mv)
 
 int main(int argc, char* argv[])
 {
-    Option opt;
-    if (!ParseCmdLineArgs(argc, argv, opt)) {
+    Config cfg;
+    if (!ParseCmdLineArgs(argc, argv, cfg)) {
         Usage();
         return -1;
     }
     
-    FILE* fp = fopen(opt.m_filename.c_str(), "rb");
+    FILE* fp = fopen(cfg.m_filename.c_str(), "rb");
     if (fp == NULL) {
-        printf("Could not open video file %s.\n", opt.m_filename.c_str());
+        printf("Could not open video file %s.\n", cfg.m_filename.c_str());
         return -1;
     }
 
     _fseeki64(fp, 0L, SEEK_END);
     int64_t fileSize = _ftelli64(fp);
-    int64_t yuvSize = opt.m_width * opt.m_height * 3 / 2;
-    int64_t ySize = opt.m_width * opt.m_height;
+    int64_t yuvSize = cfg.m_width * cfg.m_height * 3 / 2;
+    int64_t ySize = cfg.m_width * cfg.m_height;
     int numFrames = (int)(fileSize / yuvSize);
 
     std::vector<cv::Mat> motionVectors(numFrames);
@@ -265,7 +265,7 @@ int main(int argc, char* argv[])
     {
         fread(buffer, yuvSize, 1, fp);
         cv::Mat curFrame;
-        curFrame.create(opt.m_height, opt.m_width, CV_8UC1);
+        curFrame.create(cfg.m_height, cfg.m_width, CV_8UC1);
         memcpy(curFrame.data, buffer, ySize);
         if (curFrame.empty()) {
             error = true;

@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 
-struct Option
+struct Config
 {
     std::string m_if;
     std::string m_of;
@@ -12,7 +12,7 @@ struct Option
     int m_startFrame;
     int m_endFrame;
 
-    Option()
+    Config()
     {
         Init();
     }
@@ -30,7 +30,7 @@ struct Option
     }
 };
 
-bool ParseCmdLineArgs(int argc, char* argv[], Option& opt)
+bool ParseCmdLineArgs(int argc, char* argv[], Config& opt)
 {
     opt.Init();
 
@@ -94,48 +94,48 @@ void Usage()
 
 int main(int argc, char* argv[])
 {
-    Option opt;
-    if (!ParseCmdLineArgs(argc, argv, opt)) {
+    Config cfg;
+    if (!ParseCmdLineArgs(argc, argv, cfg)) {
         Usage();
         return -1;
     }
 
-    FILE* fpi = fopen(opt.m_if.c_str(), "rb");
+    FILE* fpi = fopen(cfg.m_if.c_str(), "rb");
     if (fpi == NULL) {
-        printf("Could not open input file %s.\n", opt.m_if.c_str());
+        printf("Could not open input file %s.\n", cfg.m_if.c_str());
         return -1;
     }
-    FILE* fpo = fopen(opt.m_of.c_str(), "wb");
+    FILE* fpo = fopen(cfg.m_of.c_str(), "wb");
     if (fpo == NULL) {
-        printf("Could not open output file %s.\n", opt.m_of.c_str());
+        printf("Could not open output file %s.\n", cfg.m_of.c_str());
         fclose(fpi);
         return -1;
     }
 
     _fseeki64(fpi, 0L, SEEK_END);
     int64_t fileSize = _ftelli64(fpi);
-    int64_t frameSize = opt.m_width * opt.m_height * 3 / 2;
+    int64_t frameSize = cfg.m_width * cfg.m_height * 3 / 2;
     int numFrames = (int)(fileSize / frameSize);
 
-    if (opt.m_startFrame < 1 
-        || opt.m_startFrame > numFrames 
-        || (opt.m_endFrame < 1 && opt.m_endFrame != -1) 
-        || opt.m_endFrame > numFrames
-        || (opt.m_endFrame < opt.m_startFrame && opt.m_endFrame != -1)) {
+    if (cfg.m_startFrame < 1 
+        || cfg.m_startFrame > numFrames 
+        || (cfg.m_endFrame < 1 && cfg.m_endFrame != -1) 
+        || cfg.m_endFrame > numFrames
+        || (cfg.m_endFrame < cfg.m_startFrame && cfg.m_endFrame != -1)) {
         printf("Frame range is invalid.\n");
         fclose(fpi);
         fclose(fpo);
         return -1;
     }
     else {
-        opt.m_startFrame = opt.m_startFrame - 1; // we count frames from 0, other than 1
-        opt.m_endFrame = opt.m_endFrame == -1 ? numFrames - 1 : opt.m_endFrame - 1;
+        cfg.m_startFrame = cfg.m_startFrame - 1; // we count frames from 0, other than 1
+        cfg.m_endFrame = cfg.m_endFrame == -1 ? numFrames - 1 : cfg.m_endFrame - 1;
     }
 
-    _fseeki64(fpi, opt.m_startFrame * frameSize, SEEK_SET);
+    _fseeki64(fpi, cfg.m_startFrame * frameSize, SEEK_SET);
 
     uint8_t* buffer = new uint8_t[frameSize];
-    for (int i = opt.m_startFrame; i <= opt.m_endFrame; i++) {
+    for (int i = cfg.m_startFrame; i <= cfg.m_endFrame; i++) {
         fread(buffer, frameSize, 1, fpi);
         fwrite(buffer, frameSize, 1, fpo);
         fflush(fpo);

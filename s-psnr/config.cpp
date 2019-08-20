@@ -1,18 +1,18 @@
 #include "stdafx.h"
-#include "option.h"
+#include "config.h"
 #include "mapper.h"
 
-Option::Option()
+Config::Config()
 {
     Reset();
 }
 
-Option::~Option()
+Config::~Config()
 {
 
 }
 
-void Option::Reset()
+void Config::Reset()
 {
     m_srcFile.clear();
     m_dstFile.clear();
@@ -23,7 +23,7 @@ void Option::Reset()
     m_dstFormat = MF_UNKNOWN;
 }
 
-bool Option::IsValid()
+bool Config::IsValid()
 {
     return (!m_srcFile.empty()) && (!m_dstFile.empty())
         && (!m_sphFile.empty())
@@ -32,7 +32,7 @@ bool Option::IsValid()
         && (m_srcFormat != MF_UNKNOWN) && (m_dstFormat != MF_UNKNOWN);
 }
 
-bool Option::ParseCmdLineArgs(int argc, char* argv[])
+bool Config::ParseCmdLineArgs(int argc, char* argv[])
 {
     if (argc <= 1 && argv == NULL)
         return false;
@@ -96,7 +96,7 @@ bool Option::ParseCmdLineArgs(int argc, char* argv[])
     return IsValid();
 }
 
-void Option::Usage()
+void Config::Usage()
 {
     char* help_str =
         "Usage: s-psnr.exe [options...] src_file dst_file sph_file \n"

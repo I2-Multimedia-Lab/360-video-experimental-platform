@@ -1,6 +1,6 @@
 #pragma once
 
-class Option
+class Config
 {
 public:
     String m_srcFile;
@@ -13,8 +13,8 @@ public:
     int m_srcFormat;
     int m_dstFormat;
 
-    Option();
-    ~Option();
+    Config();
+    ~Config();
 
     void Reset();
     bool IsValid();

@@ -61,21 +61,12 @@ void Mapper::SphPointFromImg(const Image& img, int format, const Vec2f& sphPoint
 
 void Mapper::SphToCart(const cv::Point2f& in, cv::Point3f& out)
 {
-    float lat = in.x * PI / 180.0f;
-    float lon = in.y * PI / 180.0f;
+    float lon = in.y * PI / 180.0f;  // phi
+    float lat = in.x * PI / 180.0f;  // theta
 
-    /* 
-        the cartesian coodinate system:
-                    y
-                    |
-                    |_ _ _ x
-                   / o
-                z /
-    */
-
-    out.x = sinf(lon) * cosf(lat);
+    out.x = cosf(lat) * cosf(lon);
     out.y = sinf(lat);
-    out.z = -cosf(lon) * cosf(lat);
+    out.z = -cosf(lat) * sinf(lon);
 }
 
 void Mapper::SphToRect(const Image& img, const cv::Point3f& in, cv::Point2f& out)
@@ -83,19 +74,17 @@ void Mapper::SphToRect(const Image& img, const cv::Point3f& in, cv::Point2f& out
     int w = img.cols;
     int h = img.rows;
 
-    /* 
-        --------------------
-       |               /\   |       theta: [-pi,pi]
-       y  < theta >    phi  |   
-       |               \/   |       phi: [0, pi] 
-        --------- x --------
-    */
+    float phi = atan2f(-in.z, in.x);
+    float theta = asinf(in.y);
 
-    float theta = atan2f(in.x, -in.z);
-    float phi = acosf(in.y);
+    float u = phi / TWOPI + 0.5f;
+    float v = 0.5f - theta / PI;
 
-    out.x = w * (0.5f + theta / TWOPI);
-    out.y = h * (phi / PI);
+    float m = w * u - 0.5f;
+    float n = h * v - 0.5f;
+
+    out.x = Clamp(m - 0.5f, 0.0f, w - 1.0f);
+    out.y = Clamp(n - 0.5f, 0.0f, h - 1.0f);
 }
 
 unsigned char Mapper::IFilterNearest(const Image& img, const cv::Point2f& in)
@@ -103,11 +92,8 @@ unsigned char Mapper::IFilterNearest(const Image& img, const cv::Point2f& in)
     int w = img.cols;
     int h = img.rows;
     
-    float fx = Clamp(in.x - 0.5f, 0.0f, w - 1.0f);
-    float fy = Clamp(in.y - 0.5f, 0.0f, h - 1.0f);
-
-    int lx = lrintf(fx);
-    int ly = lrintf(fy);
+    int lx = lrintf(in.x);
+    int ly = lrintf(in.y);
 
     return img.at<uchar>(ly, lx);
 }

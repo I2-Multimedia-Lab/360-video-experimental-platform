@@ -3,14 +3,14 @@
 
 #include "stdafx.h"
 
-struct Option
+struct Config
 {
     std::string m_srcFile;
     std::string m_dstFile;
     int m_width;
     int m_height;
 
-    Option()
+    Config()
     {
         Init();
     }
@@ -26,7 +26,7 @@ struct Option
     }
 };
 
-bool ParseCmdLineArgs(int argc, char* argv[], Option& opt)
+bool ParseCmdLineArgs(int argc, char* argv[], Config& opt)
 {
     opt.Init();
 
@@ -164,32 +164,32 @@ private:
 
 int main(int argc, char* argv[])
 {
-    Option opt;
-    if (!ParseCmdLineArgs(argc, argv, opt)) {
+    Config cfg;
+    if (!ParseCmdLineArgs(argc, argv, cfg)) {
         Usage();
         return -1;
     }
 
-    FILE* fp = fopen(opt.m_srcFile.c_str(), "rb");
+    FILE* fp = fopen(cfg.m_srcFile.c_str(), "rb");
     if (fp == NULL) {
-        printf("Could not open reference file %s.\n", opt.m_srcFile.c_str());
+        printf("Could not open reference file %s.\n", cfg.m_srcFile.c_str());
         return -1;
     }
     _fseeki64(fp, 0L, SEEK_END);
     int64_t fileSize = _ftelli64(fp);
-    int64_t yuvSize = opt.m_width * opt.m_height * 3 / 2;
-    int64_t ySize = opt.m_width * opt.m_height;
+    int64_t yuvSize = cfg.m_width * cfg.m_height * 3 / 2;
+    int64_t ySize = cfg.m_width * cfg.m_height;
     int numFrames = (int)(fileSize / yuvSize);
     fclose(fp);
     fp = NULL;
 
-    VideoSource vsSrc(opt.m_srcFile.c_str(), opt.m_width, opt.m_height);
+    VideoSource vsSrc(cfg.m_srcFile.c_str(), cfg.m_width, cfg.m_height);
     if (!vsSrc.Init()) {
         printf("Reference file init failed.\n");
         return -1;
     }
 
-    VideoSource vsDst(opt.m_dstFile.c_str(), opt.m_width, opt.m_height);
+    VideoSource vsDst(cfg.m_dstFile.c_str(), cfg.m_width, cfg.m_height);
     if (!vsDst.Init()) {
         printf("Reference file init failed.\n");
         return -1;

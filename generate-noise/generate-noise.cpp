@@ -13,7 +13,7 @@ enum class NoiseType
     Gaussian,
 };
 
-struct Option
+struct Config
 {
     std::string m_inputFile;
     std::string m_outputFile;
@@ -21,7 +21,7 @@ struct Option
     int m_height;
     NoiseType m_type;
 
-    Option() 
+    Config() 
     {
         Init();
     }
@@ -38,7 +38,7 @@ struct Option
     }
 };
 
-bool ParseCmdLineArgs(int argc, char* argv[], Option& opt)
+bool ParseCmdLineArgs(int argc, char* argv[], Config& opt)
 {
     opt.Init();
 
@@ -124,27 +124,27 @@ void AddGuassianNoise(cv::Mat& img, int stddev)
 
 int main(int argc, char* argv[])
 {
-    Option opt;
-    if (!ParseCmdLineArgs(argc, argv, opt)) {
+    Config cfg;
+    if (!ParseCmdLineArgs(argc, argv, cfg)) {
         Usage();
         return -1;
     }
 
-    FILE* fpi = fopen(opt.m_inputFile.c_str(), "rb");
+    FILE* fpi = fopen(cfg.m_inputFile.c_str(), "rb");
     if (fpi == NULL) {
-        printf("Could not open input file %s.\n", opt.m_inputFile.c_str());
+        printf("Could not open input file %s.\n", cfg.m_inputFile.c_str());
         return -1;
     }
-    FILE* fpo = fopen(opt.m_outputFile.c_str(), "wb");
+    FILE* fpo = fopen(cfg.m_outputFile.c_str(), "wb");
     if (fpo == NULL) {
-        printf("Could not open output file %s.\n", opt.m_outputFile.c_str());
+        printf("Could not open output file %s.\n", cfg.m_outputFile.c_str());
         fclose(fpi);
         return -1;
     }
 
     _fseeki64(fpi, 0L, SEEK_END);
     int64_t fileSize = _ftelli64(fpi);
-    int64_t frameSize = opt.m_width * opt.m_height * 3 / 2;
+    int64_t frameSize = cfg.m_width * cfg.m_height * 3 / 2;
     int numFrames = (int)(fileSize / frameSize);
 
     _fseeki64(fpi, 0L, SEEK_SET);
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
         fread(buffer, frameSize, 1, fpi);
 
         cv::Mat yuvImg;
-        yuvImg.create(opt.m_height * 3 / 2, opt.m_width, CV_8UC1);
+        yuvImg.create(cfg.m_height * 3 / 2, cfg.m_width, CV_8UC1);
         memcpy(yuvImg.data, buffer, frameSize);
         if (yuvImg.empty()) {
             error = true;
@@ -165,9 +165,9 @@ int main(int argc, char* argv[])
         cv::Mat rgbImg;
         cvtColor(yuvImg, rgbImg, CV_YUV2BGR_I420);
 
-        if (opt.m_type == NoiseType::SaltPepper)
+        if (cfg.m_type == NoiseType::SaltPepper)
             AddSaltPepperNoise(rgbImg, DEFAULT_SALT_PEPPER_NOISE_RATIO);
-        else if (opt.m_type == NoiseType::Gaussian)
+        else if (cfg.m_type == NoiseType::Gaussian)
             AddGuassianNoise(rgbImg, DEFAULT_GAUSSIAN_NOISE_STDDEV);
 
         cvtColor(rgbImg, yuvImg, CV_BGR2YUV_I420);

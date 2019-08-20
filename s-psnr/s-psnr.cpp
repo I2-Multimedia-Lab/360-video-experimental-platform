@@ -2,28 +2,28 @@
 //
 
 #include "stdafx.h"
-#include "option.h"
+#include "config.h"
 #include "video_source.h"
 #include "spsnr_metric.h"
 
 int main(int argc, char* argv[])
 {
-    Option opt;
-    if (!opt.ParseCmdLineArgs(argc, argv)) {
-        opt.Usage();
+    Config cfg;
+    if (!cfg.ParseCmdLineArgs(argc, argv)) {
+        cfg.Usage();
         return -1;
     }
 
     VideoSource src;
-    if (!src.Init(opt.m_srcFile, opt.m_srcWidth, opt.m_srcHeight, opt.m_srcFormat))
+    if (!src.Init(cfg.m_srcFile, cfg.m_srcWidth, cfg.m_srcHeight, cfg.m_srcFormat))
         return -1;
 
     VideoSource dst;
-    if (!dst.Init(opt.m_dstFile, opt.m_dstWidth, opt.m_dstHeight, opt.m_dstFormat))
+    if (!dst.Init(cfg.m_dstFile, cfg.m_dstWidth, cfg.m_dstHeight, cfg.m_dstFormat))
         return -1;
 
     SPSNRMetric metric;
-    if (!metric.Init(opt.m_sphFile))
+    if (!metric.Init(cfg.m_sphFile))
         return -1;
 
     if (!metric.Calc(src, dst))
