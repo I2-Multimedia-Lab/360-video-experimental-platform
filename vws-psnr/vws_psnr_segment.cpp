@@ -16,21 +16,21 @@ VWSPSNRSegment::~VWSPSNRSegment()
 
 void VWSPSNRSegment::PushSrc(const cv::Mat& frame)
 {
-    m_srcQueue.push_back(frame);
+    m_srcQueue.push_back(frame.clone());
     if ((int)m_srcQueue.size() > m_len)
         m_srcQueue.pop_front();
 }
 
 void VWSPSNRSegment::PushDst(const cv::Mat& frame)
 {
-    m_dstQueue.push_back(frame);
+    m_dstQueue.push_back(frame.clone());
     if ((int)m_dstQueue.size() > m_len)
         m_dstQueue.pop_front();
 }
 
 void VWSPSNRSegment::PushDiffMap(const cv::Mat& diffMap)
 {
-    m_diffMapQueue.push_back(diffMap);
+    m_diffMapQueue.push_back(diffMap.clone());
     if ((int)m_diffMapQueue.size() > m_len)
         m_diffMapQueue.pop_front();
 }
