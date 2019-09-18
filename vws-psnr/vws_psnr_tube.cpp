@@ -32,7 +32,7 @@ bool VWSPSNRTube::Create(const std::deque<cv::Mat>& frameQueue, const cv::Rect f
         if (preFrame.empty())
             blockRect = firstBlockRect;
         else
-            MatchBlock(curFrame, preFrame, blockRect);
+            MatchBlock(preFrame, curFrame, blockRect);
         
         m_blocks.push_front(blockRect);
 
@@ -42,7 +42,7 @@ bool VWSPSNRTube::Create(const std::deque<cv::Mat>& frameQueue, const cv::Rect f
     return true;
 }
 
-bool VWSPSNRTube::MatchBlock(const cv::Mat& c, const cv::Mat& r, cv::Rect& rc)
+bool VWSPSNRTube::MatchBlock(const cv::Mat& src, const cv::Mat& dst, cv::Rect& rc)
 {
     // NTSS block matching
     int stepMax = (int)pow(2, (floor(log10(SEARCH_PARAM + 1) / log10(2)) - 1));
@@ -53,14 +53,14 @@ bool VWSPSNRTube::MatchBlock(const cv::Mat& c, const cv::Mat& r, cv::Rect& rc)
     int y = rc.y;
 
     // check 8 locations at distance = stepMax, generally 4
-    cv::Mat1d diff1 = Match(c, r, cv::Point(x, y), cv::Point(x, y), step);
+    cv::Mat1d diff1 = Match(src, dst, cv::Point(x, y), cv::Point(x, y), step);
 
     double min1;
     cv::Point min1Loc;
     cv::minMaxLoc(diff1, &min1, NULL, &min1Loc, NULL);
 
     // check 8 locations at distance = 1
-    cv::Mat1d diff2 = Match(c, r, cv::Point(x, y), cv::Point(x, y), 1);
+    cv::Mat1d diff2 = Match(src, dst, cv::Point(x, y), cv::Point(x, y), 1);
 
     double min2;
     cv::Point min2Loc;
@@ -91,7 +91,7 @@ bool VWSPSNRTube::MatchBlock(const cv::Mat& c, const cv::Mat& r, cv::Rect& rc)
 
     // second-step-stop
     if (ntssFlag) {
-        diff2 = Match(c, r, cv::Point(x, y), minLoc, 1, true);
+        diff2 = Match(src, dst, cv::Point(x, y), minLoc, 1, true);
 
         cv::minMaxLoc(diff2, &min2, NULL, &min2Loc, NULL);
 
@@ -107,7 +107,7 @@ bool VWSPSNRTube::MatchBlock(const cv::Mat& c, const cv::Mat& r, cv::Rect& rc)
     // do normal TSS 
     step /= 2;
 
-    diff1 = Match(c, r, cv::Point(x, y), minLoc, step, true);
+    diff1 = Match(src, dst, cv::Point(x, y), minLoc, step, true);
 
     cv::minMaxLoc(diff1, &min1, NULL, &min1Loc, NULL);
     if (minDiff < min1) { // found and stop
@@ -122,7 +122,7 @@ bool VWSPSNRTube::MatchBlock(const cv::Mat& c, const cv::Mat& r, cv::Rect& rc)
 
     // last step search
     step /= 2;
-    diff1 = Match(c, r, cv::Point(x, y), minLoc, step, true);
+    diff1 = Match(src, dst, cv::Point(x, y), minLoc, step, true);
 
     cv::minMaxLoc(diff1, &min1, NULL, &min1Loc, NULL);
     if (min1 < minDiff) {
@@ -135,32 +135,32 @@ bool VWSPSNRTube::MatchBlock(const cv::Mat& c, const cv::Mat& r, cv::Rect& rc)
     return true;
 }
 
-cv::Mat1d VWSPSNRTube::Match(const cv::Mat& c, const cv::Mat& r, const cv::Point& center, const cv::Point& target, int step /*= 1*/, bool skipNOC /*= false*/)
+cv::Mat1d VWSPSNRTube::Match(const cv::Mat& src, const cv::Mat& dst, const cv::Point& origin, const cv::Point& search, int step /*= 1*/, bool skipNOC /*= false*/)
 {
     cv::Mat1d diff = cv::Mat1d::ones(3, 3);
     diff *= DBL_MAX;
 
-    int x = center.x;
-    int y = center.y;
+    int ox = origin.x;
+    int oy = origin.y;
 
-    cv::Mat cb(c, cv::Rect(x, y, VWSPSNRBlock::BLOCK_SIZE, VWSPSNRBlock::BLOCK_SIZE));
+    cv::Mat templateBlock(src, cv::Rect(ox, oy, VWSPSNRBlock::BLOCK_SIZE, VWSPSNRBlock::BLOCK_SIZE));
 
-    int w = c.cols;
-    int h = c.rows;
+    int w = dst.cols;
+    int h = dst.rows;
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            int rx = target.x - step + j * step;
-            int ry = target.y - step + i * step;
+            int sx = search.x - step + j * step;
+            int sy = search.y - step + i * step;
 
-            if (rx < 0 || ry < 0 || rx >= w - VWSPSNRBlock::BLOCK_SIZE || ry >= h - VWSPSNRBlock::BLOCK_SIZE)  // out of bounds
+            if (sx < 0 || sy < 0 || sx >= w - VWSPSNRBlock::BLOCK_SIZE || sy >= h - VWSPSNRBlock::BLOCK_SIZE)  // out of bounds
                 continue;
 
-            if (skipNOC && rx >= x - 1 && rx <= x + 1 && ry >= y - 1 && ry <= y + 1) // avoid recalculating neighbors of center
+            if (skipNOC && sx >= ox - 1 && sx <= ox + 1 && sy >= oy - 1 && sy <= oy + 1) // avoid recalculating neighbors of center
                 continue;
 
-            cv::Mat rb(r, cv::Rect(rx, ry, VWSPSNRBlock::BLOCK_SIZE, VWSPSNRBlock::BLOCK_SIZE));
-            diff[i][j] = MAD(cb, rb);
+            cv::Mat searchBlock(dst, cv::Rect(sx, sy, VWSPSNRBlock::BLOCK_SIZE, VWSPSNRBlock::BLOCK_SIZE));
+            diff[i][j] = MAD(searchBlock, templateBlock);
         }
     }
 
