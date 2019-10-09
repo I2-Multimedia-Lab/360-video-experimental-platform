@@ -5,8 +5,10 @@
 ### Video Quality Assessment
 
 * psnr
+* s-psnr
 * ws-psnr
 * vws-psnr
+* ov-psnr
 
 ### Block Matching Algorithm
 
