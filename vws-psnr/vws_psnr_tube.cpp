@@ -191,14 +191,14 @@ double VWSPSNRTube::Compute(const std::deque<cv::Mat>& diffMapQueue, const cv::M
     double pg, cg, mg; // distortion gradient
     int sc = 0; // sign changes of the distortion gradient
 
-    for (int i = (int)m_blocks.size() - 1; i >= 0; i--) {
+    for (int i = 0; i < m_blocks.size(); i++) {
         VWSPSNRBlock& block = m_blocks[i];
         const cv::Mat& diffMap = diffMapQueue[i];
 
         cd = block.Compute(diffMap, weightMap);
 
         //  recursive filter
-        if (i == (int)m_blocks.size() - 1) {
+        if (i == 0) {
             d = cd;
             pg = cg = mg = 0.0;
         }
@@ -207,7 +207,7 @@ double VWSPSNRTube::Compute(const std::deque<cv::Mat>& diffMapQueue, const cv::M
             double acg = abs(cg);
 
             double alpha = (acg > DISTORTION_GRADIENT_THRESHOLD) ? (interval / 200.0) : (interval / 400.0); // decided by distortion gradient 
-            d = alpha * cd + (1 - alpha) * d;
+            d = alpha * d + (1 - alpha) * cd;
 
             if ((cg < 0.0) != (pg < 0.0))
                 sc++;
@@ -218,7 +218,7 @@ double VWSPSNRTube::Compute(const std::deque<cv::Mat>& diffMapQueue, const cv::M
         pd = cd;
         pg = cg;
     }
-
+    
     double tdc = TemporalDistortionCoefficient(mg, sc);
     m_distortion = d * (1 + BETA * tdc);
 
