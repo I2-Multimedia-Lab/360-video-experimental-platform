@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "s-psnr", "s-psnr\s-psnr.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ov-psnr", "ov-psnr\ov-psnr.vcxproj", "{F5D21041-154B-4231-8B75-080206F69634}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpp-psnr", "cpp-psnr\cpp-psnr.vcxproj", "{D5F2BC81-BAF2-49A2-B5C0-DC5B1A60923A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -57,6 +59,10 @@ Global
 		{F5D21041-154B-4231-8B75-080206F69634}.Debug|x64.Build.0 = Debug|x64
 		{F5D21041-154B-4231-8B75-080206F69634}.Release|x64.ActiveCfg = Release|x64
 		{F5D21041-154B-4231-8B75-080206F69634}.Release|x64.Build.0 = Release|x64
+		{D5F2BC81-BAF2-49A2-B5C0-DC5B1A60923A}.Debug|x64.ActiveCfg = Debug|x64
+		{D5F2BC81-BAF2-49A2-B5C0-DC5B1A60923A}.Debug|x64.Build.0 = Debug|x64
+		{D5F2BC81-BAF2-49A2-B5C0-DC5B1A60923A}.Release|x64.ActiveCfg = Release|x64
+		{D5F2BC81-BAF2-49A2-B5C0-DC5B1A60923A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
