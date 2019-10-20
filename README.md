@@ -6,6 +6,7 @@
 
 * psnr
 * s-psnr
+* cpp-psnr
 * ws-psnr
 * vws-psnr
 * ov-psnr
