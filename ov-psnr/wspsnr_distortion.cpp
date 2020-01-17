@@ -55,7 +55,7 @@ void WSPSNRDistortion::GenerateWeightMap(int width, int height)
     if (!m_weightMap.empty())
         return;
 
-    m_weightMap.ones(height, width, CV_64FC1);
+    m_weightMap = cv::Mat::ones(height, width, CV_64FC1);
 
     // equirectangular weight from WS-PSNR
     for (int j = 0; j < m_weightMap.rows; j++) {

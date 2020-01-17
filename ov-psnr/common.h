@@ -6,9 +6,9 @@ enum MetricType
 {
     MT_UNKNOWN = 0,
     MT_PSNR,
-    MT_WSPSNR,
     MT_SPSNR_NN,
     MT_CPPPSNR,
+    MT_WSPSNR,
 };
 
 enum GeometryType

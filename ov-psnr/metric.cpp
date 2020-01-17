@@ -132,14 +132,14 @@ void Metric::CompareLastFrame()
     case MT_PSNR:
         dMap = m_psnr.Calculate(lastSrc, lastDst);
         break;
-    case MT_WSPSNR:
-        dMap = m_wspsnr.Calculate(lastSrc, lastDst);
-        break;
     case MT_SPSNR_NN:
         dMap = m_spsnr.Calculate(lastSrc, lastDst);
         break;
     case MT_CPPPSNR:
         dMap = m_cpppsnr.Calculate(lastSrc, lastDst);
+        break;
+    case MT_WSPSNR:
+        dMap = m_wspsnr.Calculate(lastSrc, lastDst);
         break;
     }
     assert(dMap != nullptr);

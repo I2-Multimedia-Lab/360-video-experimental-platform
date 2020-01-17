@@ -38,5 +38,5 @@ private:
 private:
     Vector<cv::Point3f> m_cartPoints;
     cv::flann::Index m_kdtree;
-    cv::Mat m_r2sMap;
+    cv::Mat m_r2sMap;  // rect point to sphere point map 
 };

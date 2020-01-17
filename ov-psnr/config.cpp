@@ -2,7 +2,7 @@
 #include "config.h"
 #include "common.h"
 
-#define DEFAULT_FPS 30
+#define DEFAULT_FPS 25
 
 Config::Config()
 {
