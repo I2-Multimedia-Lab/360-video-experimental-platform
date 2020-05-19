@@ -139,7 +139,7 @@ void Config::Usage()
         "   -s, format of source video, 1: ERP, 2: CMP\n"
         "   -d, format of destination video, 1: ERP, 2: CMP\n"
         "   -f, frames per second, default 30 if not set\n"
-        "   -m, metric type, 1:PSNR, 2:WS-PSNR, 3:S-PSNR-NN, 4:CPP-PSNR\n"
+        "   -m, metric type, 1:PSNR, 2:S-PSNR-NN, 3:CPP-PSNR, 4:WS-PSNR\n"
         "   -p, spheric coordinates file for S-PSNR\n"
         "\n"
         "Example: ov-psnr.exe -i origin.yuv -w 4096 -h 2048 -s 1 -o impaired.yuv -e 4096 -j 2048 -d 1 -f 25 -m 3 -p sphere_655362.txt\n";

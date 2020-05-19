@@ -46,12 +46,12 @@ bool ParseCmdLineArgs(int argc, char* argv[], Config& opt)
                 const char* q = argv[i];
                 opt.m_height = atoi(q);
             }
-            else if (p[1] == 'o' && p[2] == '\0') {
+            else if (p[1] == 'i' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
                 opt.m_srcFile = q;
             }
-            else if (p[1] == 'r' && p[2] == '\0') {
+            else if (p[1] == 'o' && p[2] == '\0') {
                 i++;
                 const char* q = argv[i];
                 opt.m_dstFile = q;
@@ -70,10 +70,10 @@ void Usage()
         "Option:\n"
         "   -w, width of video\n"
         "   -h, height of video\n"
-        "   -o, reference file name\n"
-        "   -r, processed file name\n"
+        "   -i, reference file name\n"
+        "   -o, processed file name\n"
         "\n"
-        "Example: psnr.exe -w 720 -h 480 -t 2 -i origin.yuv -o impaired.yuv\n";
+        "Example: psnr.exe -w 720 -h 480 -i origin.yuv -o impaired.yuv\n";
 
     printf(help_str);
 }
