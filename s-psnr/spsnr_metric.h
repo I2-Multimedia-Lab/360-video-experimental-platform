@@ -8,12 +8,12 @@ public:
     SPSNRMetric();
     ~SPSNRMetric();
 
-    bool Init(const String& sphFile);
+    bool Init(const String& sphFile, int ifilter);
     bool Calc(VideoSource& src, VideoSource& dst);
     void Output();
 
 private:
-    double MSE(Vec1b srcPixels, Vec1b dstPixels);
+    double MSE(Vec1d srcPixels, Vec1d dstPixels);
     double PSNR(double mse);
 
 private:

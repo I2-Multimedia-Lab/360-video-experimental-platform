@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
         return -1;
 
     SPSNRMetric metric;
-    if (!metric.Init(cfg.m_sphFile))
+    if (!metric.Init(cfg.m_sphFile, cfg.m_ifilter))
         return -1;
 
     if (!metric.Calc(src, dst))

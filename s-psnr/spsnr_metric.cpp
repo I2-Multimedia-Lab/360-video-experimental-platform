@@ -14,7 +14,7 @@ SPSNRMetric::~SPSNRMetric()
 
 }
 
-bool SPSNRMetric::Init(const String& sphFile)
+bool SPSNRMetric::Init(const String& sphFile, int ifilter)
 {
     char tmp[32];
     if (sscanf(sphFile.c_str(), "%[^_]_%d.txt", tmp, &m_numPoints) != 2)
@@ -33,6 +33,8 @@ bool SPSNRMetric::Init(const String& sphFile)
 
     fclose(fp);
 
+    m_mapper.SetIFilter(ifilter);
+
     return true;
 }
 
@@ -50,10 +52,10 @@ bool SPSNRMetric::Calc(VideoSource& src, VideoSource& dst)
         if (!dst.ReadNextFrame(dstImg))
             break;
 
-        Vec1b srcPixels;
+        Vec1d srcPixels;
         m_mapper.SphPointFromImg(srcImg, src.Format(), m_points, srcPixels);
 
-        Vec1b dstPixels;
+        Vec1d dstPixels;
         m_mapper.SphPointFromImg(dstImg, dst.Format(), m_points, dstPixels);
 
         double mse = MSE(srcPixels, dstPixels);
@@ -68,14 +70,14 @@ bool SPSNRMetric::Calc(VideoSource& src, VideoSource& dst)
     return true;
 }
 
-double SPSNRMetric::MSE(Vec1b srcPixels, Vec1b dstPixels)
+double SPSNRMetric::MSE(Vec1d srcPixels, Vec1d dstPixels)
 {
     assert(srcPixels.size() == dstPixels.size());
 
     size_t n = srcPixels.size();
     double totalMSE = 0.0;
     for (size_t i = 0; i < n; i++)
-        totalMSE += pow((double)srcPixels[i] - (double)dstPixels[i], 2.0);
+        totalMSE += pow(srcPixels[i] - dstPixels[i], 2.0);
     totalMSE /= n;
 
     return totalMSE;

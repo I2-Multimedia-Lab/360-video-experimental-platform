@@ -21,15 +21,21 @@ void Config::Reset()
     m_dstWidth = m_dstHeight = 0;
     m_srcFormat = MF_UNKNOWN;
     m_dstFormat = MF_UNKNOWN;
+    m_ifilter = IF_NEAREST;
 }
 
 bool Config::IsValid()
 {
+    if ((m_srcFormat == MF_CUBE && m_srcHeight / (double)m_srcWidth != 0.75) ||
+        (m_dstFormat == MF_CUBE && m_dstHeight / (double)m_dstWidth != 0.75))  // Only support cube map 4x3 format!
+        return false;
+
     return (!m_srcFile.empty()) && (!m_dstFile.empty())
         && (!m_sphFile.empty())
         && (m_srcWidth != 0) && (m_srcHeight != 0)
         && (m_dstWidth != 0) && (m_dstHeight != 0)
-        && (m_srcFormat != MF_UNKNOWN) && (m_dstFormat != MF_UNKNOWN);
+        && (m_srcFormat != MF_UNKNOWN) && (m_dstFormat != MF_UNKNOWN)
+        && ((m_ifilter == IF_NEAREST) || (m_ifilter == IF_LANCZOS));
 }
 
 bool Config::ParseCmdLineArgs(int argc, char* argv[])
@@ -72,6 +78,11 @@ bool Config::ParseCmdLineArgs(int argc, char* argv[])
                 const char* q = argv[i];
                 m_dstFormat = Mapper::StringToFormat(q);
             }
+            else if (p[1] == 'f' && p[2] == '\0') {
+                i++;
+                const char* q = argv[i];
+                m_ifilter = atoi(q) - 1;
+            }
             continue;
         }
 
@@ -105,8 +116,9 @@ void Config::Usage()
         "   -m, height of src video\n"
         "   -v, width of dst video\n"
         "   -n, height of dst video\n"
-        "   -i, src file format: rect, cube\n"
-        "   -o, dest file format: rect, cube\n"
+        "   -i, src file format: rect, cube(only 4x3)\n"
+        "   -o, dest file format: rect, cube(only 4x3)\n"
+        "   -f, interpolation filter type: 1: nearest, 2:lanczos\n"
         "\n"
         "Example: s-psnr.exe -b 4096 -m 2048 -v 2048 -n 1024 -i rect -o cube origin.yuv impaired.yuv sphere_655362.txt\n";
 
