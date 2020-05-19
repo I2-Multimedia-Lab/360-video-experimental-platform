@@ -37,6 +37,10 @@ bool Config::IsValid()
     if (m_dstWidth == 0 || m_dstHeight == 0)
         return false;
 
+    if ((m_srcFormat == GT_CUBEMAP && m_srcHeight / (double)m_srcWidth != 0.75) ||
+        (m_dstFormat == GT_CUBEMAP && m_dstHeight / (double)m_dstWidth != 0.75))  // Only support cube map 4x3 format!
+        return false;
+
     return true;
 }
 
@@ -106,8 +110,8 @@ void Config::Usage()
         "   -h, height of source video\n"
         "   -e, width of destination video\n"
         "   -j, height of destination video\n"
-        "   -s, format of source video, 1: ERP, 2: CMP\n"
-        "   -d, format of destination video, 1: ERP, 2: CMP\n"
+        "   -s, format of source video, 1: ERP, 2: CMP(4x3)\n"
+        "   -d, format of destination video, 1: ERP, 2: CMP(4x3)\n"
         "\n"
         "Example: cpp-psnr.exe -i origin.yuv -w 4096 -h 2048 -s 1 -o impaired.yuv -e 4096 -j 2048 -d 1\n";
 

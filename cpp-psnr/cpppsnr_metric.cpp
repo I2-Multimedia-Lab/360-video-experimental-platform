@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "video_source.h"
 #include "cpppsnr_metric.h"
+#include "mapper.h"
 
 #define LANCZOS_TAB_SIZE        3
 #define LANCZOS_FAST_SCALE      100
@@ -44,17 +45,16 @@ bool CPPPSNRMetric::Calc(VideoSource& src, VideoSource& dst)
             break;
 
         Image srcCPP;
-        ERPToCPP(srcImg, srcCPP);
+        ConvertToCPP(src.Format(), srcImg, srcCPP);
 
         Image dstCPP;
-        ERPToCPP(dstImg, dstCPP);
+        ConvertToCPP(dst.Format(), dstImg, dstCPP);
 
         double mse = MSE(srcCPP, dstCPP);
         globalMSE += mse;
 
-        printf("\r(%d)", i + 1);
+        printf("Frame %d: %lf\n", i, PSNR(mse));
     }
-    printf("\r\n");
 
     globalMSE /= numFrames;
     m_globalPSNR = PSNR(globalMSE);
@@ -76,11 +76,11 @@ void CPPPSNRMetric::GenerateCPPMap(int w, int h)
 
     for (int j = 0; j < h; j++) {
         for (int i = 0; i < w; i++) {
-            double phi = 3 * asin((double)j / h - 0.5);
+            double phi = 3 * asin(0.5 - (double)j / h);
             double lambda = (2 * M_PI * (double)i / w - M_PI) / (2 * cos(2 * phi / 3) - 1);
 
-            double x = w * (lambda + M_PI) / (2 * M_PI);
-            double y = h * (phi + M_PI / 2) / M_PI;
+            double x = w * (lambda / (2 * M_PI) + 0.5);
+            double y = h * (0.5 - phi / M_PI);
 
             int idx_x = (int)((x < 0) ? x - 0.5 : x + 0.5);
             int idx_y = (int)((y < 0) ? y - 0.5 : y + 0.5);
@@ -91,6 +91,22 @@ void CPPPSNRMetric::GenerateCPPMap(int w, int h)
     }
 }
 
+void CPPPSNRMetric::ConvertToCPP(int format, const Image& img, Image& cpp)
+{
+    switch (format)
+    {
+    case GT_EQUIRECT:
+        ERPToCPP(img, cpp);
+        break;
+    case GT_CUBEMAP:
+        CMPToCPP(img, cpp);
+        break;
+    default:
+        break;
+    }
+
+}
+
 void CPPPSNRMetric::ERPToCPP(const Image& erp, Image& cpp)
 {
     assert(!m_cppMap.empty());
@@ -99,16 +115,146 @@ void CPPPSNRMetric::ERPToCPP(const Image& erp, Image& cpp)
 
     for (int j = 0; j < cpp.rows; j++) {
         for (int i = 0; i < cpp.cols; i++) {
-            double phi = 3 * asin((double)j / erp.rows - 0.5);
-            double lambda = (2 * M_PI * (double)i / erp.cols - M_PI) / (2 * cos(2 * phi / 3) - 1);
+            double phi = 3 * asin(0.5 - (double)j / cpp.rows);
+            double lambda = (2 * M_PI * (double)i / cpp.cols - M_PI) / (2 * cos(2 * phi / 3) - 1);
 
-            double x = erp.cols * (lambda + M_PI) / (2 * M_PI);
-            double y = erp.rows * (phi + M_PI / 2) / M_PI;
+            double x = erp.cols * (lambda / (2 * M_PI) + 0.5) - 0.5;
+            double y = erp.rows * (0.5 - phi / M_PI) - 0.5;
 
             if (m_cppMap.at<uchar>(j, i) != 0)
                 cpp.at<double>(j, i) = IFilterLanczos(erp, cv::Point2d(x, y));
         }
     }
+}
+
+void CPPPSNRMetric::CMPToCPP(const Image& cmp, Image& cpp)
+{
+    std::vector<Image> faces = std::move(ExtractCubeFace(cmp));
+
+    assert(!m_cppMap.empty());
+
+    cpp = cv::Mat::zeros(m_cppMap.rows, m_cppMap.cols, CV_64FC1);
+
+    for (int j = 0; j < cpp.rows; j++) {
+        for (int i = 0; i < cpp.cols; i++) {
+            double phi = 3 * asin(0.5 - (double)j / cpp.rows);
+            double lambda = (2 * M_PI * (double)i / cpp.cols - M_PI) / (2 * cos(2 * phi / 3) - 1);
+
+            // convert to cart
+            cv::Point3d cart;
+            cart.x = cos(phi) * cos(lambda);
+            cart.y = sin(phi);
+            cart.z = -cos(phi) * sin(lambda);
+
+            cv::Point2d cmpPoint;
+            int faceIdx;
+            CartToCube(cmp, cart, cmpPoint, faceIdx);
+
+            if (m_cppMap.at<uchar>(j, i) != 0)
+                cpp.at<double>(j, i) = IFilterLanczos(faces[faceIdx], cmpPoint);
+        }
+    }
+}
+
+void CPPPSNRMetric::CartToCube(const Image& img, const cv::Point3d& in, cv::Point2d& out, int& faceIdx)
+{
+    int w = img.cols;
+    int h = img.rows;
+
+    int A = w / 4;
+
+    // ref JVET-D0021 
+    std::vector<cv::Rect> faceArea({
+        { 2 * A, A, A, A },  // PX
+        { 0, A, A, A },      // NX
+        { A, 0, A, A },      // PY
+        { A, 2 * A, A, A },  // NY
+        { A, A, A, A },      // PZ
+        { 3 * A, A, A, A }   // NZ
+    });
+
+    double aX = fabs(in.x);
+    double aY = fabs(in.y);
+    double aZ = fabs(in.z);
+
+    double u, v;
+
+    if (aX >= aY && aX >= aZ) {
+        if (in.x > 0) {
+            faceIdx = 0;
+            u = -in.z / aX;
+            v = -in.y / aX;
+        }
+        else {
+            faceIdx = 1;
+            u = in.z / aX;
+            v = -in.y / aX;
+        }
+    }
+    else if (aY >= aX && aY >= aZ) {
+        if (in.y > 0) {
+            faceIdx = 2;
+            u = in.x / aY;
+            v = in.z / aY;
+        }
+        else {
+            faceIdx = 3;
+            u = in.x / aY;
+            v = -in.z / aY;
+        }
+    }
+    else if (aZ >= aX && aZ >= aY) {
+        if (in.z > 0) {
+            faceIdx = 4;
+            u = in.x / aZ;
+            v = -in.y / aZ;
+        }
+        else {
+            faceIdx = 5;
+            u = -in.x / aZ;
+            v = -in.y / aZ;
+        }
+    }
+    else {
+        assert(false);
+    }
+
+    assert(faceIdx >= 0 && faceIdx <= 5);
+
+    double m = (u + 1.0) * (A / 2.0) - 0.5;
+    double n = (v + 1.0) * (A / 2.0) - 0.5;
+    assert(m >= -1 && m < A + 1);
+    assert(n >= -1 && n < A + 1);
+
+    out.x = m;
+    out.y = n;
+}
+
+std::vector<Image> CPPPSNRMetric::ExtractCubeFace(const Image& cmp)
+{
+    int w = cmp.cols;
+    int h = cmp.rows;
+
+    int A = w / 4;
+
+    std::vector<cv::Rect> faceArea({
+        { 2 * A, A, A, A },  // PX
+        { 0, A, A, A },      // NX
+        { A, 0, A, A },      // PY
+        { A, 2 * A, A, A },  // NY
+        { A, A, A, A },      // PZ
+        { 3 * A, A, A, A }   // NZ
+    });
+
+    std::vector<Image> faces(6);
+    faces[0] = cmp(faceArea[0]);
+    faces[1] = cmp(faceArea[1]);
+    faces[2] = cmp(faceArea[2]);
+    faces[3] = cmp(faceArea[3]);
+    faces[4] = cmp(faceArea[4]);
+    faces[5] = cmp(faceArea[5]);
+
+    return faces;
 }
 
 double CPPPSNRMetric::MSE(const Image& src, const Image& dst)
