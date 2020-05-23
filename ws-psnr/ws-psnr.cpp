@@ -73,7 +73,7 @@ void Usage()
         "   -o, reference file name\n"
         "   -r, processed file name\n"
         "\n"
-        "Example: ws-psnr.exe -w 720 -h 480 -t 2 -i origin.yuv -o impaired.yuv\n";
+        "Example: ws-psnr.exe -w 720 -h 480 -t 2 -o origin.yuv -r impaired.yuv\n";
 
     printf(help_str);
 }
