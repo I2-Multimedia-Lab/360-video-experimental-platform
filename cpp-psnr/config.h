@@ -11,6 +11,7 @@ public:
     int m_dstHeight;
     int m_srcFormat;
     int m_dstFormat;
+    int m_ifilter;
 
     Config();
     ~Config();

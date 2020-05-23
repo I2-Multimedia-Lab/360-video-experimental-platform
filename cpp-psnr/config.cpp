@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "config.h"
-#include "mapper.h"
+#include "common.h"
 
 #define DEFAULT_FPS 25
 
@@ -24,6 +24,7 @@ void Config::Reset()
     m_dstHeight = 0;
     m_srcFormat = GT_UNKNOWN;
     m_dstFormat = GT_UNKNOWN;
+    m_ifilter = IF_NEAREST;
 }
 
 bool Config::IsValid()
@@ -39,6 +40,9 @@ bool Config::IsValid()
 
     if ((m_srcFormat == GT_CUBEMAP && m_srcHeight / (double)m_srcWidth != 0.75) ||
         (m_dstFormat == GT_CUBEMAP && m_dstHeight / (double)m_dstWidth != 0.75))  // Only support cube map 4x3 format!
+        return false;
+
+    if (m_ifilter != IF_NEAREST && m_ifilter != IF_LANCZOS)
         return false;
 
     return true;
@@ -94,6 +98,11 @@ bool Config::ParseCmdLineArgs(int argc, char* argv[])
             const char* q = argv[i];
             m_dstFormat = atoi(q);
         }
+        else if (p[1] == 'l' && p[2] == '\0') {  // -l
+            i++;
+            const char* q = argv[i];
+            m_ifilter = atoi(q);
+        }
     }
 
     return IsValid();
@@ -110,10 +119,11 @@ void Config::Usage()
         "   -h, height of source video\n"
         "   -e, width of destination video\n"
         "   -j, height of destination video\n"
-        "   -s, format of source video, 1: ERP, 2: CMP(4x3)\n"
-        "   -d, format of destination video, 1: ERP, 2: CMP(4x3)\n"
+        "   -s, format of source video, 1:ERP, 2:CMP(4x3)\n"
+        "   -d, format of destination video, 1:ERP, 2:CMP(4x3)\n"
+        "   -l, interpolation type, 1:Nearest(default), 2:Lanczos\n"
         "\n"
-        "Example: cpp-psnr.exe -i origin.yuv -w 4096 -h 2048 -s 1 -o impaired.yuv -e 4096 -j 2048 -d 1\n";
+        "Example: cpp-psnr.exe -i origin_erp.yuv -w 4096 -h 2048 -s 1 -o impaired_cmp.yuv -e 4096 -j 3072 -d 2 -l 2\n";
 
     printf(help_str);
 }

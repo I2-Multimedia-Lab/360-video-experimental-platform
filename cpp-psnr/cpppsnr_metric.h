@@ -6,7 +6,7 @@ public:
     CPPPSNRMetric();
     ~CPPPSNRMetric();
 
-    bool Init(int w, int h);
+    bool Init(int w, int h, int ifilter);
     bool Calc(VideoSource& src, VideoSource& dst);
     void Output();
 
@@ -21,10 +21,14 @@ private:
     void CartToCube(const Image& img, const cv::Point3d& in, cv::Point2d& out, int& faceIdx);
     std::vector<Image> ExtractCubeFace(const Image& cmp);
 
+    float Clamp(float v, float low, float high) const;
+    double IFilterNearest(const cv::Mat& img, const cv::Point2f& in) const;
+
     void InitLanczosCoef();
     double IFilterLanczos(const cv::Mat& img, const cv::Point2d& in) const;
 
 private:
+    int m_ifilter;
     cv::Mat m_cppMap;
     double m_globalPSNR;
     std::vector<double> m_lanczosCoef;

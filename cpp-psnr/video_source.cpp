@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "video_source.h"
-#include "mapper.h"
 
 VideoSource::VideoSource()
     : m_fp(nullptr)

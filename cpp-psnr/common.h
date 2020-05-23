@@ -7,10 +7,9 @@ enum GeometryType
     GT_CUBEMAP,
 };
 
-class Mapper
+enum IFilterType
 {
-public:
-    Mapper();
-    ~Mapper();
-
+    IF_UNKNOWN = 0,
+    IF_NEAREST,
+    IF_LANCZOS,
 };

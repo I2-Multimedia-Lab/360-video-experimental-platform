@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "video_source.h"
 #include "cpppsnr_metric.h"
-#include "mapper.h"
+#include "common.h"
 
 #define LANCZOS_TAB_SIZE        3
 #define LANCZOS_FAST_SCALE      100
@@ -10,6 +10,7 @@
 
 CPPPSNRMetric::CPPPSNRMetric()
     : m_globalPSNR(0.0)
+    , m_ifilter(IF_NEAREST)
 {
 
 }
@@ -19,10 +20,12 @@ CPPPSNRMetric::~CPPPSNRMetric()
 
 }
 
-bool CPPPSNRMetric::Init(int w, int h)
+bool CPPPSNRMetric::Init(int w, int h, int ifilter)
 {
     printf("Generating CPP map...\n");
     GenerateCPPMap(w, h);
+
+    m_ifilter = ifilter;
 
     printf("Initing Lanczos coef...\n");
     InitLanczosCoef();
@@ -121,8 +124,20 @@ void CPPPSNRMetric::ERPToCPP(const Image& erp, Image& cpp)
             double x = erp.cols * (lambda / (2 * M_PI) + 0.5) - 0.5;
             double y = erp.rows * (0.5 - phi / M_PI) - 0.5;
 
-            if (m_cppMap.at<uchar>(j, i) != 0)
-                cpp.at<double>(j, i) = IFilterLanczos(erp, cv::Point2d(x, y));
+            if (m_cppMap.at<uchar>(j, i) != 0) {
+                switch (m_ifilter)
+                {
+                case IF_NEAREST:
+                    cpp.at<double>(j, i) = IFilterNearest(erp, cv::Point2d(x, y));
+                    break;
+                case IF_LANCZOS:
+                    cpp.at<double>(j, i) = IFilterLanczos(erp, cv::Point2d(x, y));
+                    break;
+                default:
+                    assert(false);
+                    break;
+                }
+            }
         }
     }
 }
@@ -146,12 +161,24 @@ void CPPPSNRMetric::CMPToCPP(const Image& cmp, Image& cpp)
             cart.y = sin(phi);
             cart.z = -cos(phi) * sin(lambda);
 
-            cv::Point2d cmpPoint;
+            cv::Point2d facePt;
             int faceIdx;
-            CartToCube(cmp, cart, cmpPoint, faceIdx);
+            CartToCube(cmp, cart, facePt, faceIdx);
 
-            if (m_cppMap.at<uchar>(j, i) != 0)
-                cpp.at<double>(j, i) = IFilterLanczos(faces[faceIdx], cmpPoint);
+            if (m_cppMap.at<uchar>(j, i) != 0) {
+                switch (m_ifilter)
+                {
+                case IF_NEAREST:
+                    cpp.at<double>(j, i) = IFilterNearest(faces[faceIdx], facePt);
+                    break;
+                case IF_LANCZOS:
+                    cpp.at<double>(j, i) = IFilterLanczos(faces[faceIdx], facePt);
+                    break;
+                default:
+                    assert(false);
+                    break;
+                }
+            }
         }
     }
 }
@@ -296,6 +323,27 @@ static double sinc(double x)
     {
         return sin(x) / x;
     }
+}
+
+float CPPPSNRMetric::Clamp(float v, float low, float high) const
+{
+    if (v < low) return low;
+    else if (v > high) return high;
+    else return v;
+}
+
+double CPPPSNRMetric::IFilterNearest(const cv::Mat& img, const cv::Point2f& in) const
+{
+    int w = img.cols;
+    int h = img.rows;
+
+    float x = Clamp(in.x - 0.5f, 0.0f, w - 1.0f);
+    float y = Clamp(in.y - 0.5f, 0.0f, h - 1.0f);
+
+    int lx = lrintf(x);
+    int ly = lrintf(y);
+
+    return (double)img.at<uchar>(ly, lx);
 }
 
 void CPPPSNRMetric::InitLanczosCoef()

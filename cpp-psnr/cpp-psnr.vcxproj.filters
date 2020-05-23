@@ -27,10 +27,10 @@
     <ClInclude Include="config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mapper.h">
+    <ClInclude Include="cpppsnr_metric.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cpppsnr_metric.h">
+    <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -45,9 +45,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="config.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cpppsnr_metric.cpp">

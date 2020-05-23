@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
         return -1;
 
     CPPPSNRMetric metric;
-    if (!metric.Init(src.Width(), src.Height()))
+    if (!metric.Init(src.Width(), src.Height(), cfg.m_ifilter))
         return -1;
 
     if (!metric.Calc(src, dst))
