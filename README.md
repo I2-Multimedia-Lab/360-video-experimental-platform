@@ -10,6 +10,7 @@
 * ws-psnr
 * vws-psnr
 * ov-psnr
+* ssim
 
 ### Block Matching Algorithm
 
