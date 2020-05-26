@@ -25,6 +25,11 @@ bool Metric::Init(const Config& cfg)
     if (!cfg.IsValid())
         return false;
 
+    if (cfg.m_dstFormat == GT_CUBEMAP && ((double)cfg.m_dstHeight / cfg.m_dstWidth != 0.75)) {
+        printf("Only support cube mapping 4x3 format!\n");
+        return false;
+    }
+
     if (!m_src.Init(cfg.m_srcFilename, cfg.m_srcWidth, cfg.m_srcHeight, cfg.m_srcFormat)) {
         printf("Source video load failed!\n");
         return false;
@@ -44,13 +49,12 @@ bool Metric::Init(const Config& cfg)
     m_fps = cfg.m_fps;
     m_segmentCapacity = m_fps * TEMPORAL_HORIZON / 1000;
 
-    // TODO: support more source format
     if (m_src.Format() != GT_EQUIRECT) {
         printf("Source video format only supports ERP.\n");
         return false;
     }
 
-    if (cfg.m_metric == MT_SPSNR_NN) {
+    if (cfg.m_metric == MT_SPSNR) {
         printf("[S-PSNR]Read Spheric points...\n");
         if (!m_spsnr.ReadSphPoint(cfg.m_sphPointFile)) {
             printf("Spheric points file read failed.\n");
@@ -58,11 +62,13 @@ bool Metric::Init(const Config& cfg)
         }
         printf("[S-PSNR]Generate Rect-To-Sph Map...");
         clock_t start = clock();
-        m_spsnr.GenerateR2SMap(m_src.Width(), m_src.Height());  // take times
+        m_spsnr.GenerateR2SMap(m_src.Width(), m_src.Height(), cfg.m_r2sMapFile);  // take times
         printf("%.1lfs\n", (double)(clock() - start) / CLOCKS_PER_SEC);
+
+        m_spsnr.SetIFilter(cfg.m_ifilter);
     }
     else if (cfg.m_metric == MT_CPPPSNR) {
-        m_cpppsnr.Init(m_src.Width(), m_src.Height());
+        m_cpppsnr.Init(m_src.Width(), m_src.Height(), cfg.m_ifilter);
     }
 
     return true;
@@ -132,7 +138,7 @@ void Metric::CompareLastFrame()
     case MT_PSNR:
         dMap = m_psnr.Calculate(lastSrc, lastDst);
         break;
-    case MT_SPSNR_NN:
+    case MT_SPSNR:
         dMap = m_spsnr.Calculate(lastSrc, lastDst);
         break;
     case MT_CPPPSNR:

@@ -4,6 +4,8 @@
 #define DEFAULT_INTERVAL 40
 #define SEARCH_PARAM 7
 #define DISTORTION_GRADIENT_THRESHOLD 2.5
+#define ALPHA_1 0.8
+#define ALPHA_2 0.5
 #define BETA 1.0
 
 Tube::Tube()
@@ -193,8 +195,8 @@ void Tube::Calculate(const Segment& segment)
             cg = (d - pd) / m_interval;
             double acg = abs(cg);
 
-            double alpha = (acg > DISTORTION_GRADIENT_THRESHOLD) ? (m_interval / 200.0) : (m_interval / 400.0); // decided by distortion gradient 
-            D = alpha * D + (1 - alpha) * d;
+            double alpha = (acg > DISTORTION_GRADIENT_THRESHOLD) ? ALPHA_1 : ALPHA_2; // decided by distortion gradient 
+            D = (1 - alpha) * d + alpha * D;
 
             if ((cg < 0.0) != (pg < 0.0))
                 sc++;

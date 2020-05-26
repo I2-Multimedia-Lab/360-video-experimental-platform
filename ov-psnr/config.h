@@ -14,6 +14,8 @@ public:
     int m_fps;
     int m_metric;
     String m_sphPointFile;
+    int m_ifilter;
+    String m_r2sMapFile;
 
 public:
     Config();

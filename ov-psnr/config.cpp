@@ -26,6 +26,9 @@ void Config::Reset()
     m_dstFormat = GT_UNKNOWN;
     m_fps = DEFAULT_FPS;
     m_metric = MT_PSNR;
+    m_sphPointFile.clear();
+    m_ifilter = IF_NEAREST;
+    m_r2sMapFile.clear();
 }
 
 bool Config::IsValid() const
@@ -44,7 +47,9 @@ bool Config::IsValid() const
         return false;
     if ((m_metric == MT_PSNR || m_metric == MT_WSPSNR) && (m_srcFormat != m_dstFormat) && (m_srcWidth != m_dstWidth) && (m_srcHeight != m_dstHeight))
         return false;
-    if (m_metric == MT_SPSNR_NN && m_sphPointFile.empty())
+    if (m_metric == MT_SPSNR && m_sphPointFile.empty())
+        return false;
+    if (m_metric == MT_SPSNR && (m_ifilter != IF_NEAREST && m_ifilter != IF_LANCZOS))
         return false;
 
     return true;
@@ -115,6 +120,16 @@ bool Config::ParseCmdLineArgs(int argc, char* argv[])
             const char* q = argv[i];
             m_sphPointFile = q;
         }
+        else if (p[1] == 'l' && p[2] == '\0') {  // -l
+            i++;
+            const char* q = argv[i];
+            m_ifilter = atoi(q);
+        }
+        else if (p[1] == 'r' && p[2] == '\0') {  // -r
+            i++;
+            const char* q = argv[i];
+            m_r2sMapFile = q;
+        }
     }
 
     if (!IsValid()) {
@@ -136,13 +151,14 @@ void Config::Usage()
         "   -h, height of source video\n"
         "   -e, width of destination video\n"
         "   -j, height of destination video\n"
-        "   -s, format of source video, 1: ERP, 2: CMP\n"
-        "   -d, format of destination video, 1: ERP, 2: CMP\n"
+        "   -s, format of source video, 1: ERP, 2: CMP(4x3)\n"
+        "   -d, format of destination video, 1: ERP, 2: CMP(4x3)\n"
         "   -f, frames per second, default 30 if not set\n"
-        "   -m, metric type, 1:PSNR, 2:S-PSNR-NN, 3:CPP-PSNR, 4:WS-PSNR\n"
+        "   -m, metric type, 1:PSNR, 2:S-PSNR, 3:CPP-PSNR, 4:WS-PSNR\n"
         "   -p, spheric coordinates file for S-PSNR\n"
+        "   -l, interpolation type for S-PSNS and CPP-PSNR, 1:Nearest(default), 2:Lanczos\n"
         "\n"
-        "Example: ov-psnr.exe -i origin.yuv -w 4096 -h 2048 -s 1 -o impaired.yuv -e 4096 -j 2048 -d 1 -f 25 -m 3 -p sphere_655362.txt\n";
+        "Example: ov-psnr.exe -i origin_erp.yuv -w 4096 -h 2048 -s 1 -o impaired_cmp.yuv -e 4096 -j 3072 -d 2 -f 25 -m 2 -p sphere_655362.txt -l 2\n";
 
     printf(help_str);
 }
