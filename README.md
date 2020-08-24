@@ -1,6 +1,8 @@
 # 360-video-experimental-platform
 
 ## About
+Related papers:
+> P. Zhang and P. Gao, “Quality Assessment for Omnidirectional Video with Consideration of Temporal Distortion Variations,” in 2019 IEEE Visual Communications and Image Processing (VCIP), 2019, pp. 1–4.
 
 ### Video Quality Assessment
 
