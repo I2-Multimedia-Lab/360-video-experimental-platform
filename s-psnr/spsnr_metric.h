@@ -20,5 +20,6 @@ private:
     int m_numPoints;
     Vec2f m_points;
     double m_globalPSNR;
+    double m_duration;
     Mapper m_mapper;
 };

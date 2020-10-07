@@ -11,6 +11,7 @@
 CPPPSNRMetric::CPPPSNRMetric()
     : m_globalPSNR(0.0)
     , m_ifilter(IF_NEAREST)
+    , m_duration(0.0)
 {
 
 }
@@ -36,6 +37,7 @@ bool CPPPSNRMetric::Init(int w, int h, int ifilter)
 bool CPPPSNRMetric::Calc(VideoSource& src, VideoSource& dst)
 {
     double globalMSE = 0.0;
+    m_duration = 0.0;
 
     int numFrames = src.FrameCount();
     for (int i = 0; i < numFrames; i++) {
@@ -47,6 +49,8 @@ bool CPPPSNRMetric::Calc(VideoSource& src, VideoSource& dst)
         if (!dst.ReadNextFrame(dstImg))
             break;
 
+        clock_t start = clock();
+
         Image srcCPP;
         ConvertToCPP(src.Format(), srcImg, srcCPP);
 
@@ -54,13 +58,20 @@ bool CPPPSNRMetric::Calc(VideoSource& src, VideoSource& dst)
         ConvertToCPP(dst.Format(), dstImg, dstCPP);
 
         double mse = MSE(srcCPP, dstCPP);
-        globalMSE += mse;
+        double psnr = PSNR(mse);
 
-        printf("Frame %d: %lf\n", i, PSNR(mse));
+        double t = (double)(clock() - start) / CLOCKS_PER_SEC;
+
+        globalMSE += mse;
+        m_duration += t;
+
+        printf("Frame %d: %.4lf, %.4lf\n", i, psnr, t);
     }
 
     globalMSE /= numFrames;
     m_globalPSNR = PSNR(globalMSE);
+
+    m_duration /= numFrames;
 
     return true;
 }
@@ -68,6 +79,7 @@ bool CPPPSNRMetric::Calc(VideoSource& src, VideoSource& dst)
 void CPPPSNRMetric::Output()
 {
     printf("Global PSNR: %lf\n", m_globalPSNR);
+    printf("Average Time: %lf\n", m_duration);
 }
 
 void CPPPSNRMetric::GenerateCPPMap(int w, int h)

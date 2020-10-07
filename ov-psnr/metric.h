@@ -35,4 +35,5 @@ private:
     SPSNRDistortion m_spsnr;
     CPPPSNRDistortion m_cpppsnr;
     double m_globalPSNR;
+    double m_averageDuration;
 };

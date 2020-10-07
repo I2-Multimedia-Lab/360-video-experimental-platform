@@ -5,6 +5,7 @@
 SPSNRMetric::SPSNRMetric()
     : m_numPoints(0)
     , m_globalPSNR(0.0)
+    , m_duration(0.0)
 {
 
 }
@@ -41,6 +42,7 @@ bool SPSNRMetric::Init(const String& sphFile, int ifilter)
 bool SPSNRMetric::Calc(VideoSource& src, VideoSource& dst)
 {
     double globalMSE = 0.0;
+    m_duration = 0.0;
 
     int numFrames = src.FrameCount();
     for (int i = 0; i < numFrames; i++) {
@@ -52,6 +54,8 @@ bool SPSNRMetric::Calc(VideoSource& src, VideoSource& dst)
         if (!dst.ReadNextFrame(dstImg))
             break;
 
+        clock_t start = clock();
+
         Vec1d srcPixels;
         m_mapper.SphPointFromImg(srcImg, src.Format(), m_points, srcPixels);
 
@@ -59,13 +63,18 @@ bool SPSNRMetric::Calc(VideoSource& src, VideoSource& dst)
         m_mapper.SphPointFromImg(dstImg, dst.Format(), m_points, dstPixels);
 
         double mse = MSE(srcPixels, dstPixels);
-        globalMSE += mse;
+        double psnr = PSNR(mse);
+        double t = (double)(clock() - start) / CLOCKS_PER_SEC;
 
-        printf("Frame %d: %lf\n", i, PSNR(mse));
+        globalMSE += mse;
+        m_duration += t;
+
+        printf("Frame %d: %.4lf, %.4lf\n", i, psnr, t);
     }
 
     globalMSE /= numFrames;
     m_globalPSNR = PSNR(globalMSE);
+    m_duration /= numFrames;
 
     return true;
 }
@@ -91,4 +100,5 @@ double SPSNRMetric::PSNR(double mse)
 void SPSNRMetric::Output()
 {
     printf("Global PSNR: %lf\n", m_globalPSNR);
+    printf("Average Time: %lf\n", m_duration);
 }

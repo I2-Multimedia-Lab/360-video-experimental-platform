@@ -11,6 +11,7 @@ Metric::Metric()
     , m_fps(DEFAULT_FPS)
     , m_segmentCapacity(DEFAULT_CAP)
     , m_globalPSNR(0.0)
+    , m_averageDuration(0.0)
 {
 
 }
@@ -77,6 +78,7 @@ bool Metric::Init(const Config& cfg)
 void Metric::Compare()
 {
     double globalDistortion = 0.0;
+    double totalDuration = 0.0;
 
     int numFrames = m_src.FrameCount();
     for (int i = 0; i < numFrames; i++) {
@@ -94,28 +96,33 @@ void Metric::Compare()
         // construct tubes
         clock_t start = clock();
         curFrame.ConstructTubes(m_segment, m_fps);
-        printf("%.1lfs, ", (double)(clock() - start) / CLOCKS_PER_SEC);
+        double t1 = (double)(clock() - start) / CLOCKS_PER_SEC;
+        printf("%.3lfs, ", t1);
 
         // calculate distortion
         start = clock();
         CompareLastFrame();
         curFrame.Calculate(m_segment);
-        printf("%.1lfs, ", (double)(clock() - start) / CLOCKS_PER_SEC);
-        printf("%.2lf", curFrame.GetPSNR());
+        double t2 = (double)(clock() - start) / CLOCKS_PER_SEC;
+        printf("%.3lfs, ", t2);
+        printf("%.3lf", curFrame.GetPSNR());
 
         printf("\n");
 
         globalDistortion += curFrame.GetDistortion();
+        totalDuration += (t1 + t2);
     }
 
     globalDistortion /= numFrames;
 
     m_globalPSNR = 10 * log10(255 * 255 / (globalDistortion + DBL_EPSILON));
+    m_averageDuration = totalDuration / numFrames;
 }
 
 void Metric::Output()
 {
-    printf("The global PSNR is %.2lf\n", m_globalPSNR);
+    printf("The global PSNR is %.3lf\n", m_globalPSNR);
+    printf("The average duration is %.3lf\n", m_averageDuration);
 }
 
 void Metric::PushFrame(Image&& src, Image&& dst)

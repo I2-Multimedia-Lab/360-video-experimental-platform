@@ -31,5 +31,6 @@ private:
     int m_ifilter;
     cv::Mat m_cppMap;
     double m_globalPSNR;
+    double m_duration;
     std::vector<double> m_lanczosCoef;
 };

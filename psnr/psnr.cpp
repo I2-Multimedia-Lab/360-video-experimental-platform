@@ -197,6 +197,7 @@ int main(int argc, char* argv[])
 
     bool error = false;
     double total = 0.0;
+    double duration = 0.0;
     for (int i = 0; i < numFrames; i++) {
         cv::Mat srcImg;
         vsSrc.Read(srcImg);
@@ -210,14 +211,18 @@ int main(int argc, char* argv[])
         cv::imshow("Test", dstImg);
         cv::waitKey();*/
 
+        clock_t start = clock();
         double PSNR = cv::PSNR(srcImg, dstImg);
+        double t = (double)(clock() - start) / CLOCKS_PER_SEC;
 
-        printf("Frame %d: %.4lf\n", i, PSNR);
+        printf("Frame %d: %.4lf, %.4lf\n", i, PSNR, t);
 
         total += PSNR;
+        duration += t;
     }
 
     printf("Average: %.4lf\n", total / numFrames);
+    printf("Average Time: %.4lf\n", duration / numFrames);
 
     return 0;
 }

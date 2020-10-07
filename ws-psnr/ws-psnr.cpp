@@ -73,7 +73,7 @@ void Usage()
         "   -o, reference file name\n"
         "   -r, processed file name\n"
         "\n"
-        "Example: ws-psnr.exe -w 720 -h 480 -t 2 -o origin.yuv -r impaired.yuv\n";
+        "Example: ws-psnr.exe -w 720 -h 480  -o origin.yuv -r impaired.yuv\n";
 
     printf(help_str);
 }
@@ -204,12 +204,15 @@ int main(int argc, char* argv[])
     uint8_t* buffer = new uint8_t[yuvSize];
     bool error = false;
     double total = 0.0;
+    double duration = 0.0;
     for (int i = 0; i < numFrames; i++) {
         cv::Mat srcImg;
         vsSrc.Read(srcImg);
 
         cv::Mat dstImg;
         vsDst.Read(dstImg);
+
+        clock_t start = clock();
 
         cv::Mat diffMap;
         cv::absdiff(srcImg, dstImg, diffMap);
@@ -220,12 +223,17 @@ int main(int argc, char* argv[])
 
         double WMSE = cv::sum(weightedDiff)[0] / cv::sum(weightMap)[0] / 100000;
         double WSPSNR = 10 * log10(255 * 255 / (WMSE + DBL_EPSILON));
-        printf("Frame %d: %.4lf\n", i, WSPSNR);
+
+        double t = (double)(clock() - start) / CLOCKS_PER_SEC;
+
+        printf("Frame %d: %.4lf, %.4lf\n", i, WSPSNR, t);
 
         total += WSPSNR;
+        duration += t;
     }
 
-    printf("Average: %.2lf\n", total / numFrames);
+    printf("Global PSNR: %lf\n", total / numFrames);
+    printf("Average Time: %lf\n", duration / numFrames);
 
     return 0;
 }
