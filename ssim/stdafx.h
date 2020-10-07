@@ -10,5 +10,5 @@
 #include <stdio.h>
 #include <tchar.h>
 
-#include <opencv2\opencv.hpp>
+#include <opencv2/opencv.hpp>
 

@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "block.h"
-#include "segment.h"
 
 Block::Block(const Rect& rc)
     : m_rect(rc)

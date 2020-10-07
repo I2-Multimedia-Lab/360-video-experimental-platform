@@ -66,7 +66,7 @@ bool ParseCmdLineArgs(int argc, char* argv[], Config& opt)
 void Usage()
 {
 	char* help_str =
-		"Usage: ssim.exe [options...] -o reference_file -r processed_file\n"
+		"Usage: ssim.exe [options...]\n"
 		"Option:\n"
 		"   -w, width of video\n"
 		"   -h, height of video\n"

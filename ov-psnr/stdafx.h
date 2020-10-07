@@ -24,8 +24,8 @@ using Deque = std::deque<T>;
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include <opencv2\opencv.hpp>
+#include <opencv2/opencv.hpp>
 using Rect = cv::Rect;
 using Point = cv::Point;
 
-#include <opencv2\flann.hpp>
+#include <opencv2/flann.hpp>
